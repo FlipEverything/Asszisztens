@@ -334,7 +334,7 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 			}
 			
 			saveFile.setEnabled(true);
-			editFile.setEnabled(true);
+			editFile.setEnabled(false);
 			preview.setEnabled(true);
 			cancel.setEnabled(true);
 			openFile.setEnabled(false);
