@@ -74,6 +74,10 @@ public abstract class BaseWindow extends JFrame implements ActionListener{
 	
 	}
 
+	public void packTheFrame(){
+		pack();
+	}
+
 	public void setCenter(){
 		setLocation((screenWidth-this.getWidth())/2, (screenHeight-this.getHeight())/2);	
 	}

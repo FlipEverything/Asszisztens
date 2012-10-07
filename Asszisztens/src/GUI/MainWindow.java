@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -35,8 +36,8 @@ public class MainWindow implements ActionListener{
 	private boolean resizable = true;
 	private boolean visible = true;
 	private int defaultCloseOperation = JFrame.DO_NOTHING_ON_CLOSE;
-	private int height = 300;
-	private int width = 700;
+	private int height = 450;
+	private int width = 750;
 	private boolean fullScreen = false;
 	public static final int screenHeight = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
 	public static final int screenWidth = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
@@ -63,6 +64,7 @@ public class MainWindow implements ActionListener{
 	
 	private LabCashWindow labCashWindow;
 	private DoctorScheduleWindow doctorScheduleWindow;
+	private CentrumLab c;
 	
 	public MainWindow(){
 		
@@ -127,10 +129,11 @@ public class MainWindow implements ActionListener{
 		window.setJMenuBar(menuBar);
 		window.addWindowListener(new WindowAdapter() {
 	            public void windowClosing(WindowEvent e) {
-	            	System.exit(0);
+	            	exit();
 	            }
 	    });
 		window.add(mainCenterPanel,"Center");
+		statusLabel.setBorder(BorderFactory.createLoweredBevelBorder());
 		window.add(statusLabel,"South");
 	    if (fullScreen){
 	    	window.setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -147,6 +150,7 @@ public class MainWindow implements ActionListener{
 		menuBar = new JMenuBar();
 		menu = new JMenu();
 		statusLabel = new JLabel(getDatabaseStatus());
+		c = new CentrumLab();
 		
 		class T extends Thread {
 	         public void run() {
@@ -260,7 +264,7 @@ public class MainWindow implements ActionListener{
 		
 		if (runAnotherCommand == true){
 			if (cmd=="centrumlab"){
-				new CentrumLab();
+				c.setVisible(true);
 			} else if (cmd=="exit"){
 				exit();
 			} else if (cmd=="reConnect"){
@@ -420,15 +424,16 @@ public class MainWindow implements ActionListener{
 	
 	
 	public String titleString(){
-		return "Asszisztens v." + getVersion() + " *** Dobó László ***";
+		return " Asszisztens v." + getVersion() + " *** Dobó László ***";
 	}
 	
 	public String getDatabaseStatus(){
-		return "Adatbáziskapcsolat: "+status+serverDetails;
+		return " Adatbáziskapcsolat: "+status+serverDetails;
 	}
 	
 	public void exit(){
 		mysql.close();
+		c.close();
 		AsszisztensMain.exit();
 	}
 	

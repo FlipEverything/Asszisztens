@@ -12,7 +12,11 @@ import java.util.Arrays;
 
 public class PasswordProtection extends JPanel
                           implements ActionListener {
-    private static String OK = "ok";
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 4416824940702261945L;
+	private static String OK = "ok";
     private static String HELP = "help";
 
     private JFrame controllingFrame; //needed for dialogs
