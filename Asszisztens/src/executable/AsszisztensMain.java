@@ -16,6 +16,7 @@ public class AsszisztensMain{
 	///
 	private static ServerSocket SERVER_SOCKET;
 	public MainWindow applicationWindow;
+	private static boolean DEBUG = true;
 	///
 	
 	public AsszisztensMain() throws SQLException{
@@ -26,16 +27,24 @@ public class AsszisztensMain{
 	public static void main(String[] args) {
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-            	try {
-					new AsszisztensMain();
-				} catch (SQLException e) {
-					BaseWindow.makeWarning("SQL parancsfuttatási hiba!", e, "error", new JFrame());
-				} catch (Exception e){
-					BaseWindow.makeWarning("Hiba!", e, "error", new JFrame());
-					exit();
-				}
+            	if (DEBUG){
+            		startTheMainApplication();
+            	} else {
+            		PasswordProtection.createAndShowGUI();	
+            	}
             }
         });
+	}
+	
+	public static void startTheMainApplication(){
+		try {
+			new AsszisztensMain();
+		} catch (SQLException e) {
+			BaseWindow.makeWarning("SQL parancsfuttatási hiba!", e, "error", new JFrame());
+		} catch (Exception e){
+			BaseWindow.makeWarning("Hiba!", e, "error", new JFrame());
+			exit();
+		}
 	}
 	
 	public void init(){

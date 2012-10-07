@@ -1,4 +1,4 @@
-package centrumlab;
+package GUI;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -31,7 +31,11 @@ import tools.PdfOpenFilter;
 /**
  * @author Dobó László
  */
-public class CentrumLab implements ActionListener{
+public class CentrumLab extends BaseWindow implements ActionListener{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4202548799866747834L;
 	static PDDocument doc = null;
 	static String inputFile;
 	static JFrame frame;
@@ -47,6 +51,8 @@ public class CentrumLab implements ActionListener{
 	 * @param args
 	 */
 	public CentrumLab(){
+		super(500, 120, false, true, "CentrumLab lelet átalakítás", 0, 0, JFrame.DISPOSE_ON_CLOSE, false);
+		
 		mitCsere = new ArrayList<String>();
 		mireCsere = new ArrayList<String>();
 		
@@ -74,7 +80,7 @@ public class CentrumLab implements ActionListener{
 		mitCsere.add(new String("Validálta: Dr. Széles Ilona"));
 		mireCsere.add(new String(""));
 
-		fileWindow();
+		
 	}
 
 	

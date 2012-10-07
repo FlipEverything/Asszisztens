@@ -25,7 +25,7 @@ import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 
-import centrumlab.CentrumLab;
+import GUI.CentrumLab;
 import database.Connect;
 import database.DatabaseModify;
 import executable.AsszisztensMain;
@@ -35,9 +35,9 @@ public class MainWindow implements ActionListener{
 	private boolean resizable = true;
 	private boolean visible = true;
 	private int defaultCloseOperation = JFrame.DO_NOTHING_ON_CLOSE;
-	private int height = 650;
-	private int width = 900;
-	private boolean fullScreen = true;
+	private int height = 300;
+	private int width = 700;
+	private boolean fullScreen = false;
 	public static final int screenHeight = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
 	public static final int screenWidth = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
 	/*MAIN WINDOW OPTIONS*/
@@ -46,6 +46,7 @@ public class MainWindow implements ActionListener{
 	private JMenuBar menuBar;
 	private JMenu menu;
 	private JPanel mainCenterPanel;
+	private JLabel statusLabel;
 	
 	static String inputFile;
 	static JFrame frame;
@@ -64,6 +65,7 @@ public class MainWindow implements ActionListener{
 	private DoctorScheduleWindow doctorScheduleWindow;
 	
 	public MainWindow(){
+		
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 			System.setProperty("apple.laf.useScreenMenuBar", "true");
@@ -129,6 +131,7 @@ public class MainWindow implements ActionListener{
 	            }
 	    });
 		window.add(mainCenterPanel,"Center");
+		window.add(statusLabel,"South");
 	    if (fullScreen){
 	    	window.setExtendedState(JFrame.MAXIMIZED_BOTH);
 	    }
@@ -143,6 +146,7 @@ public class MainWindow implements ActionListener{
 		admin = new User(mysql);
 		menuBar = new JMenuBar();
 		menu = new JMenu();
+		statusLabel = new JLabel(getDatabaseStatus());
 		
 		class T extends Thread {
 	         public void run() {
@@ -362,7 +366,8 @@ public class MainWindow implements ActionListener{
 			status = "online";
 			serverDetails = " - "+mysql.getActiveServer()+"@"+mysql.getActiveDatabase();
 		}
-		window.setTitle(titleString());
+		statusLabel.setText(getDatabaseStatus());
+		
 	}
 	
 	public void searchForUpdates() {
@@ -415,7 +420,11 @@ public class MainWindow implements ActionListener{
 	
 	
 	public String titleString(){
-		return "Asszisztens v." + getVersion() + " programmed by: Dobó László - Adatbáziskapcsolat: "+status+serverDetails+"";
+		return "Asszisztens v." + getVersion() + " *** Dobó László ***";
+	}
+	
+	public String getDatabaseStatus(){
+		return "Adatbáziskapcsolat: "+status+serverDetails;
 	}
 	
 	public void exit(){
