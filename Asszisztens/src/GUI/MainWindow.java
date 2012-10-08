@@ -324,7 +324,10 @@ public class MainWindow implements ActionListener{
 			} else if (cmd=="szerkesztOrvos"){
 				
 			} else if (cmd.equals("rendeloBeosztas")){
-				doctorScheduleWindow.setVisible(true);
+				if (doctorScheduleWindow==null) 
+					BaseWindow.makeWarning("Még folyik az adatletöltés", new Exception(), "success", new JFrame());
+				else
+					doctorScheduleWindow.setVisible(true);
 			}
 		}
 	}
