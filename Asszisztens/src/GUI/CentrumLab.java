@@ -272,7 +272,7 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 	
 	
 	public void save(URL url){
-		String nev = url.toString().replace("file:/", "").replace(".pdf","_aranyklinika.pdf").replaceAll("%20"," ");
+		String nev = url.toString().replace("file:/", "")/*.replace(".pdf","_aranyklinika.pdf")*/.replaceAll("%20"," ");
 		try {
 			watermarkDoc.save( nev );
 			BaseWindow.makeWarning("Elmentettem az átalakított fájlt!\r\n"+nev, new Exception(), "success", new JFrame());
@@ -316,8 +316,7 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 			Overlay overlay = new Overlay();
 			overlay.overlay(doc, watermarkDoc);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			BaseWindow.makeWarning("Nem tudtam a vízjelet rátenni a dokumentumra! Nincs meg a logo fájl?!", e, "error", this);
 		}
 	}
 	
@@ -461,8 +460,7 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 				previewText.setText(print());
 				previewText.setCaretPosition(0);
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				BaseWindow.makeWarning("Nem tudtam az előnézetet megjeleníteni!", e1, "error", new JFrame());
 			}
 		} else if (cmd.equals("saveFile")){
 			finalize();
