@@ -18,7 +18,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 
-import database.Connect;
+import database.DBConnect;
 
 public class User implements ActionListener{
 	private JPasswordField password;
@@ -26,10 +26,10 @@ public class User implements ActionListener{
 	private BaseWindow login;
 	private boolean loggedIn;
 	private String encodedPassword;
-	private Connect mysql;
+	private DBConnect mysql;
 	//private JLabel label;
 	
-	public User(Connect c){
+	public User(DBConnect c){
 		loggedIn = false;
 		mysql = c;
 		password = new JPasswordField();

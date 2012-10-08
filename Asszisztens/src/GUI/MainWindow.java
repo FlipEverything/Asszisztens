@@ -27,7 +27,7 @@ import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 
 import GUI.CentrumLab;
-import database.Connect;
+import database.DBConnect;
 import database.DatabaseModify;
 import executable.AsszisztensMain;
 
@@ -58,7 +58,7 @@ public class MainWindow implements ActionListener{
 	private String status;
 	private String serverDetails;
 	private User admin;
-	private Connect mysql;
+	private DBConnect mysql;
 	private DatabaseModify command;
 	private JLabel loginData;
 	
@@ -152,11 +152,15 @@ public class MainWindow implements ActionListener{
 		statusLabel = new JLabel(getDatabaseStatus());
 		c = new CentrumLab();
 		
+		downloadDatas();
+	}
+	
+	public void downloadDatas(){
 		class T extends Thread {
 	         public void run() {
 	        	if (mysql.isConnectionStatus()){
-	        		labCashWindow = new LabCashWindow();
-					doctorScheduleWindow = new DoctorScheduleWindow();	
+	        		if (labCashWindow==null) labCashWindow = new LabCashWindow();
+					if (doctorScheduleWindow==null) doctorScheduleWindow = new DoctorScheduleWindow();	
 	        	}
 	        		        		
 	         }
@@ -354,7 +358,7 @@ public class MainWindow implements ActionListener{
 
 	
 	public void connect(){
-		mysql = new Connect();
+		mysql = new DBConnect();
 		if (mysql.isConnectionStatus()==true){
 			status = "online";
 			serverDetails = " - "+mysql.getActiveServer()+"@"+mysql.getActiveDatabase();
@@ -365,10 +369,11 @@ public class MainWindow implements ActionListener{
 	}
 	
 	public void reConnect(){
-		mysql = new Connect();
+		mysql = new DBConnect();
 		if (mysql.isConnectionStatus()==true){
 			status = "online";
 			serverDetails = " - "+mysql.getActiveServer()+"@"+mysql.getActiveDatabase();
+			downloadDatas();
 		}
 		statusLabel.setText(getDatabaseStatus());
 		

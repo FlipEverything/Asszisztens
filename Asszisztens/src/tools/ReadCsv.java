@@ -10,7 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.StringTokenizer;
 
-import database.Connect;
+import database.DBConnect;
 
 
 public class ReadCsv {
@@ -19,7 +19,7 @@ public class ReadCsv {
 	DataInputStream in;
 	BufferedReader br;
 	
-	public ReadCsv(Connect c) throws SQLException{
+	public ReadCsv(DBConnect c) throws SQLException{
 		try {
 			openCsv();
 			readCsv(c);
@@ -43,7 +43,7 @@ public class ReadCsv {
 		in.close();
 	}
 	
-	public void readCsv(Connect sql) throws IOException, SQLException{
+	public void readCsv(DBConnect sql) throws IOException, SQLException{
 		String strLine;
 		String token;
 		String[] data = new String[8];

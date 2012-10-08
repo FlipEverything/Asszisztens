@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import rekord.Labor;
 
 public class LabCash {
-	private Connect mysql;
+	private DBConnect mysql;
 	private ArrayList<Labor> laborLista;
 	
 	public LabCash(){
-		mysql = new Connect();
+		mysql = new DBConnect();
 		laborLista = new ArrayList<Labor>();
 	}
 	

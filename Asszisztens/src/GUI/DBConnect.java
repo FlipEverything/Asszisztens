@@ -1,4 +1,4 @@
-package database;
+package GUI;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -10,7 +10,7 @@ import javax.swing.JFrame;
 
 import GUI.BaseWindow;
 
-public class Connect {
+public class DBConnect {
 	
 	private Connection conn;
 	private boolean connectionStatus;	
@@ -21,7 +21,7 @@ public class Connect {
 	private int workingConn = -1;
 	private DatabaseMirrors acc;
 	
-	public Connect(){
+	public DBConnect(){
 		connectionStatus = connectToDatabase();
 		if (connectionStatus == false){
 			Object[] o = {"Igen","Nem"};
@@ -51,10 +51,10 @@ public class Connect {
 				} catch (SQLException ex) {
 					BaseWindow.makeWarning("Nem tudok kapcsolódni a szerverhez!", ex, "error", new JFrame());
 					Object[] o = {"Igen", "Nem"};
-					boolean b = BaseWindow.ask(o, "Hiba az adatbáziskapcsolatban!", "Nem sikerült az előző kapcsolatot felépíteni! Megpróbál kapcsolatot létesíteni a tükörszerverrel?", new JFrame());
-					if (b == false){
+					//boolean b = BaseWindow.ask(o, "Hiba az adatbáziskapcsolatban!", "Nem sikerült az előző kapcsolatot felépíteni! Megpróbál kapcsolatot létesíteni a tükörszerverrel?", new JFrame());
+					/*if (b == false){
 						System.exit(0);
-					}
+					}*/
 				}
 			}
 		}
@@ -78,7 +78,7 @@ public class Connect {
 	
 	public void close(){
 		try {
-			conn.close();
+			if (conn!=null) conn.close();
 		} catch (SQLException e) {
 			BaseWindow.makeWarning("Az adatbáziskapcsolt lezárása meghiúsult!", e, "error", new JFrame());
 		}

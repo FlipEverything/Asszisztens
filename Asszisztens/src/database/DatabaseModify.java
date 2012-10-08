@@ -27,7 +27,7 @@ import GUI.BaseWindow;
 
 
 public class DatabaseModify implements ActionListener{
-	Connect mysql;
+	DBConnect mysql;
 	JTextField text;
 	BaseWindow newCat;
 	BaseWindow editRec;
@@ -47,7 +47,7 @@ public class DatabaseModify implements ActionListener{
 	private static final int height = BaseWindow.screenHeight-200;
 	private static final int width = 1080;
 	
-	public DatabaseModify(Connect mysql){
+	public DatabaseModify(DBConnect mysql){
 		this.mysql = mysql;
 	}
 	

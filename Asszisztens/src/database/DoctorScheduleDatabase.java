@@ -16,13 +16,13 @@ import rekord.RendeloOrvos;
 import rekord.RendeloSzoba;
 
 public class DoctorScheduleDatabase {
-	private Connect mysql;
+	private DBConnect mysql;
 	private ArrayList<RendeloOrvos> orvosTomb;
 	private ArrayList<RendeloSzoba> szobaTomb;
 	private ArrayList<RendeloIdopont> idopontTomb;
 	
 	public DoctorScheduleDatabase() throws SQLException{
-		mysql = new Connect();
+		mysql = new DBConnect();
 		orvosTomb = new ArrayList<RendeloOrvos>();
 		szobaTomb = new ArrayList<RendeloSzoba>();
 		idopontTomb = new ArrayList<RendeloIdopont>();
