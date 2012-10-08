@@ -18,6 +18,7 @@ public class PasswordProtection extends JPanel
 	private static final long serialVersionUID = 4416824940702261945L;
 	private static String OK = "ok";
     private static String HELP = "help";
+	private static JFrame frame;
 
     private JFrame controllingFrame; //needed for dialogs
     private JPasswordField passwordField;
@@ -67,6 +68,7 @@ public class PasswordProtection extends JPanel
         if (OK.equals(cmd)) { //Process the password.
             char[] input = passwordField.getPassword();
             if (isPasswordCorrect(input)) {
+            	frame.setVisible(false);
                 AsszisztensMain.startTheMainApplication();
             } else {
                 JOptionPane.showMessageDialog(controllingFrame,
@@ -122,7 +124,7 @@ public class PasswordProtection extends JPanel
      */
     public static void createAndShowGUI() {
         //Create and set up the window.
-        JFrame frame = new JFrame();
+        frame = new JFrame();
         try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 			System.setProperty("apple.laf.useScreenMenuBar", "true");
