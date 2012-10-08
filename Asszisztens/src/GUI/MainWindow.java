@@ -433,7 +433,7 @@ public class MainWindow implements ActionListener{
 	
 	public void exit(){
 		mysql.close();
-		c.close();
+		c.closeAll();
 		AsszisztensMain.exit();
 	}
 	

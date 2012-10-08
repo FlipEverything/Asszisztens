@@ -25,6 +25,7 @@ import javax.swing.SpringLayout;
 import layout.SpringUtilities;
 
 
+import org.apache.pdfbox.Overlay;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.exceptions.COSVisitorException;
@@ -65,6 +66,7 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 	
 	JPanel panel;
 	private String previewString = "Előnézethez nyomja meg az 'Előnézet' gombot Megnyitás után!";
+	private PDDocument watermarkDoc;
 	
 	/**
 	 * A foprogram
@@ -269,10 +271,10 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 	}
 	
 	
-	public static void save(URL url){
+	public void save(URL url){
 		String nev = url.toString().replace("file:/", "").replace(".pdf","_aranyklinika.pdf").replaceAll("%20"," ");
 		try {
-			doc.save( nev );
+			watermarkDoc.save( nev );
 			BaseWindow.makeWarning("Elmentettem az átalakított fájlt!\r\n"+nev, new Exception(), "success", new JFrame());
 		} catch (COSVisitorException e) {
 			BaseWindow.makeWarning("Nem tudtam a fájlt menteni!", e, "error", new JFrame());
@@ -281,21 +283,42 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 		}
 	}
 	
-	public void close(){
+	public void close(PDDocument doc){
 		if( doc != null )
         {
             try {
 				doc.close();
-				url = null;
 			} catch (IOException e) {
 				BaseWindow.makeWarning("Nem tudtam lezárni a fájlt!", e, "error", new JFrame());
 			}
         }
 	}
 	
+	public void closeAll(){
+		close(doc);
+		close(watermarkDoc);
+	}
+	
 	public void finalize(){
+		String path = CentrumLab.class.getProtectionDomain().getCodeSource().getLocation().getPath()+"logo.pdf";
+		path=path.replace("/bin", "");
+			addWatermark(path);
+			//System.out.println(path);
 		save(url);
-		close();
+		close(doc);
+		close(watermarkDoc);
+		cancel();
+	}
+	
+	public void addWatermark(String fileName){
+		try {
+			watermarkDoc = PDDocument.load(fileName);
+			Overlay overlay = new Overlay();
+			overlay.overlay(doc, watermarkDoc);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	 public static void openPdf(URL url) throws IOException{        
@@ -351,33 +374,7 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 			BaseWindow.makeWarning("Nem tudtam a fájlt megnyitni!", e, "success", new JFrame());
 		}
 	}
-	
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		String cmd = e.getActionCommand();
-		if (cmd.equals("openFile")){
-			if (fileWindow()){
-				try {
-					makeFileDetailsWindow(url = file.toURI().toURL());
-				} catch (MalformedURLException e2) {
-					BaseWindow.makeWarning("Hibás a fájl URL!", e2, "error", new JFrame());
-				}
-			}		
-		} else if (cmd.equals("cancel")){
-			cancel();
-		} else if (cmd.equals("preview")){
-			try {
-				previewText.setText(print());
-				previewText.setCaretPosition(0);
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		} else if (cmd.equals("saveFile")){
-			finalize();
-			cancel();
-		}
-	}
+
 	
 	public void deleteLine(String pattern) throws UnsupportedEncodingException, IOException{
 		List<?> pages = doc.getDocumentCatalog().getAllPages();
@@ -431,17 +428,45 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 	}
 	
 	public void cancel(){
-		close();
+		close(doc);
 		saveFile.setEnabled(false);
 		editFile.setEnabled(false);
 		preview.setEnabled(false);
 		cancel.setEnabled(false);
 		openFile.setEnabled(true);
 		doc = null;
+		watermarkDoc = null;
 		inputFile = null;
 		previewText.setText(previewString);
 		file = null;
 		url = null;
 		extension = null;
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		String cmd = e.getActionCommand();
+		if (cmd.equals("openFile")){
+			if (fileWindow()){
+				try {
+					makeFileDetailsWindow(url = file.toURI().toURL());
+				} catch (MalformedURLException e2) {
+					BaseWindow.makeWarning("Hibás a fájl URL!", e2, "error", new JFrame());
+				}
+			}		
+		} else if (cmd.equals("cancel")){
+			cancel();
+		} else if (cmd.equals("preview")){
+			try {
+				previewText.setText(print());
+				previewText.setCaretPosition(0);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		} else if (cmd.equals("saveFile")){
+			finalize();
+			cancel();
+		}
 	}
 }
