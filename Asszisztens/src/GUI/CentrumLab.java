@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -42,6 +43,7 @@ import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.apache.pdfbox.util.PDFOperator;
 
 import GUI.BaseWindow;
+import tools.Const;
 import tools.PdfOpenFilter;
 
 /**
@@ -62,19 +64,19 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 	
 	JButton openFile;
 	JButton editFile;
-	JButton preview;
 	JButton saveFile;
 	JButton cancel;
 	
 	JTextArea previewText;
 	
 	JPanel panel;
-	private String previewString = "Előnézethez nyomja meg az 'Előnézet' gombot Megnyitás után!";
 	private PDDocument watermarkDoc;
 	private ArrayList<String> strings;
 	private JFrame editFrame;
 	private JTextField[] textTomb;
 	private JPanel editorPanel;
+	
+	private String openPlease = "Nyisson meg egy fájlt!";
 	
 	/**
 	 * A foprogram
@@ -116,17 +118,16 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 		
 		panel.add(openFile);
 		panel.add(editFile);
-		panel.add(preview);
 		panel.add(saveFile);
 		panel.add(cancel);
 		
 		//Lay out the panel.
-        makeTheGrid(1, 5, panel);
+        makeTheGrid(1, 4, panel);
         panel.setOpaque(true);
         
         JPanel previewPanel = new JPanel();
         previewPanel.add(previewText);
-		JScrollPane pane = new JScrollPane(previewPanel );
+		JScrollPane pane = new JScrollPane(previewPanel);
         pane.setPreferredSize(new Dimension(getSize().width, getSize().height-60));
         
         setLayout(new BorderLayout());
@@ -144,32 +145,28 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 
 	
 	public void init(){
-		openFile = new JButton("Megnyitás");
+		openFile = new JButton("Megnyitás", new ImageIcon(Const.PROJECT_PATH+"icons/open.png"));
 		openFile.addActionListener(this);
 		openFile.setActionCommand("openFile");
 		
-		editFile = new JButton("Szerkesztés");
+		editFile = new JButton("Szerkesztés", new ImageIcon(Const.PROJECT_PATH+"icons/edit.png"));
 		editFile.addActionListener(this);
 		editFile.setActionCommand("editFile");
 		editFile.setEnabled(false);
 		
-		saveFile = new JButton("Mentés");
+		saveFile = new JButton("Mentés", new ImageIcon(Const.PROJECT_PATH+"icons/save.png"));
 		saveFile.addActionListener(this);
 		saveFile.setActionCommand("saveFile");
 		saveFile.setEnabled(false);
 		
-		preview = new JButton("Előnézet");
-		preview.addActionListener(this);
-		preview.setActionCommand("preview");
-		preview.setEnabled(false);
 		
-		cancel = new JButton("Mégsem");
+		cancel = new JButton("Mégsem", new ImageIcon(Const.PROJECT_PATH+"icons/cancel.png"));
 		cancel.addActionListener(this);
 		cancel.setActionCommand("cancel");
 		cancel.setEnabled(false);
 		
 		panel = new JPanel();
-		previewText = new JTextArea(previewString );
+		previewText = new JTextArea(openPlease);
 		previewText.setFont(new Font("Courier New", Font.PLAIN, 12));
 		previewText.setEditable(false);
 		
@@ -308,8 +305,7 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 	}
 	
 	public void finalize(){
-		String path = CentrumLab.class.getProtectionDomain().getCodeSource().getLocation().getPath()+"logo.pdf";
-		path=path.replace("/bin", "");
+		String path = Const.PROJECT_PATH +"logo.pdf";
 			addWatermark(path);
 			//System.out.println(path);
 		save(url);
@@ -365,7 +361,6 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 			
 			saveFile.setEnabled(true);
 			editFile.setEnabled(true);
-			preview.setEnabled(true);
 			cancel.setEnabled(true);
 			openFile.setEnabled(false);
 			
@@ -376,6 +371,7 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 			deleteLine("Tér.kat.");
 			
 			//finalize();
+			generatePreview();
 		
 		} catch (IOException e) {
 			BaseWindow.makeWarning("Nem tudtam a fájlt megnyitni!", e, "success", new JFrame());
@@ -435,16 +431,16 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 	}
 	
 	public void cancel(){
+		exitEditor();
 		close(doc);
 		saveFile.setEnabled(false);
 		editFile.setEnabled(false);
-		preview.setEnabled(false);
 		cancel.setEnabled(false);
 		openFile.setEnabled(true);
 		doc = null;
 		watermarkDoc = null;
 		inputFile = null;
-		previewText.setText(previewString);
+		previewText.setText(openPlease);
 		file = null;
 		url = null;
 		extension = null;
@@ -514,7 +510,7 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 		
 		editFrame.add(scrollPanel,"Center");
 		
-		JButton okay = new JButton("Rendben");
+		JButton okay = new JButton("Rendben", new ImageIcon(Const.PROJECT_PATH+"icons/save.png"));
 		okay.addActionListener(this);
 		okay.setActionCommand("okayEdit");
 		
@@ -559,11 +555,13 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 	public void exitEditor(){
 		textTomb = null;
         strings = null;
-        editorPanel.removeAll();
-		editFrame.dispose();
-		this.setEnabled(true);
-		this.toFront();
-		this.repaint();
+        if (editorPanel != null) editorPanel.removeAll();
+		if (editFrame != null ) {
+			editFrame.dispose();
+			this.setEnabled(true);
+			this.toFront();
+			this.repaint();
+		}
 	}
 	
 	public void editReplace(){
@@ -576,12 +574,22 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 				try {
 					replace(s, textTomb[i].getText());
 					System.out.println(s);
+					System.out.println(textTomb[i].getText());
 				} catch (IOException e) {
 					BaseWindow.makeWarning("Hiba cserélés közben! Nem sikerült ezt a sort felülírni: "+s, e, "error", this);
 				}
 			}
 			
 			i++;
+		}
+	}
+	
+	public void generatePreview(){
+		try {
+			previewText.setText(print());
+			previewText.setCaretPosition(0);
+		} catch (IOException e1) {
+			BaseWindow.makeWarning("Nem tudtam az előnézetet megjeleníteni!", e1, "error", new JFrame());
 		}
 	}
 	
@@ -599,12 +607,7 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 		} else if (cmd.equals("cancel")){
 			cancel();
 		} else if (cmd.equals("preview")){
-			try {
-				previewText.setText(print());
-				previewText.setCaretPosition(0);
-			} catch (IOException e1) {
-				BaseWindow.makeWarning("Nem tudtam az előnézetet megjeleníteni!", e1, "error", new JFrame());
-			}
+			generatePreview();
 		} else if (cmd.equals("saveFile")){
 			finalize();
 			cancel();
@@ -622,6 +625,7 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 		} else if (cmd.equals("okayEdit")){
 			editReplace();
 			exitEditor();
+			generatePreview();
 		}
 	}
 }

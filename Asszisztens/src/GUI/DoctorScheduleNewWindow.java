@@ -35,7 +35,7 @@ import javax.swing.text.MaskFormatter;
 
 import rekord.RendeloOrvos;
 import rekord.RendeloSzoba;
-import tools.ProjectContants;
+import tools.Const;
 
 import layout.SpringUtilities;
 
@@ -157,7 +157,7 @@ public class DoctorScheduleNewWindow extends BaseWindow implements ActionListene
 		radioButtons.add(alkalmi);
 		Calendar cal = Calendar.getInstance();
         cal.setFirstDayOfWeek(1);
-		northPanel.add(new JLabel("<html><body><div style='font-size: 13px; text-align: center; width: "+getWidth()+";'>Mai dátum: "+getDateTime()+" ("+ProjectContants.getDayOfTheWeek(cal.get(Calendar.DAY_OF_WEEK)).toLowerCase()+")</div></body></html>#\n\n"));
+		northPanel.add(new JLabel("<html><body><div style='font-size: 13px; text-align: center; width: "+getWidth()+";'>Mai dátum: "+getDateTime()+" ("+Const.getDayOfTheWeek(cal.get(Calendar.DAY_OF_WEEK)).toLowerCase()+")</div></body></html>#\n\n"));
 		northPanel.add(radioButtons);
 		
 				
@@ -480,8 +480,8 @@ public class DoctorScheduleNewWindow extends BaseWindow implements ActionListene
 		int index = 0;
 		c.insertItemAt("---Válasszon időpontot!---", index++);
 		c.setSelectedIndex(0);
-		for (int i=ProjectContants.CALENDAR_START_HOUR; i<ProjectContants.CALENDAR_END_HOUR; i++){
-			for (int j=0; j<60; j+=ProjectContants.CALENDAR_TIME_BETWEEN_TIME){
+		for (int i=Const.CALENDAR_START_HOUR; i<Const.CALENDAR_END_HOUR; i++){
+			for (int j=0; j<60; j+=Const.CALENDAR_TIME_BETWEEN_TIME){
 				String jj = j+"";
 				if (j<10){
 					jj="0"+j;

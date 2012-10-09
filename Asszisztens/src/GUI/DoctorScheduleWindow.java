@@ -28,7 +28,7 @@ import com.ibm.icu.util.Calendar;
 import rekord.RendeloIdopont;
 import rekord.RendeloOrvos;
 import rekord.RendeloSzoba;
-import tools.ProjectContants;
+import tools.Const;
 
 import database.DoctorScheduleDatabase;
 
@@ -191,7 +191,7 @@ public class DoctorScheduleWindow extends BaseWindow{
 			
 			@Override
 		    public int getRowCount() {
-		        return 60/ProjectContants.CALENDAR_TIME_BETWEEN_TIME*(ProjectContants.CALENDAR_END_HOUR-ProjectContants.CALENDAR_START_HOUR);
+		        return 60/Const.CALENDAR_TIME_BETWEEN_TIME*(Const.CALENDAR_END_HOUR-Const.CALENDAR_START_HOUR);
 		    }
 			
 			@Override
@@ -203,8 +203,8 @@ public class DoctorScheduleWindow extends BaseWindow{
 			@Override
 		    public Object getValueAt(int row, int col) {
 		        if (col==0){
-		        	int hour = row/(60/ProjectContants.CALENDAR_TIME_BETWEEN_TIME)+ProjectContants.CALENDAR_START_HOUR;
-		        	int min = row%(60/ProjectContants.CALENDAR_TIME_BETWEEN_TIME)*ProjectContants.CALENDAR_TIME_BETWEEN_TIME;
+		        	int hour = row/(60/Const.CALENDAR_TIME_BETWEEN_TIME)+Const.CALENDAR_START_HOUR;
+		        	int min = row%(60/Const.CALENDAR_TIME_BETWEEN_TIME)*Const.CALENDAR_TIME_BETWEEN_TIME;
 		        	String minS = "";
 		        	String hourS = "";
 		        	String endMinS = "";
@@ -214,7 +214,7 @@ public class DoctorScheduleWindow extends BaseWindow{
 		        	} else {
 		        		minS=min+"";
 		        	}
-		        	int endMin=min+ProjectContants.CALENDAR_TIME_BETWEEN_TIME;
+		        	int endMin=min+Const.CALENDAR_TIME_BETWEEN_TIME;
 		        	
 		        	int endHour = hour;
 		        	if (endMin==60){

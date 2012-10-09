@@ -1,6 +1,6 @@
 package tools;
 
-public class ProjectContants {
+public class Const {
 	/**
 	 * DoctorSchedule
 	 * DataWindow
@@ -10,6 +10,8 @@ public class ProjectContants {
 	public static final int CALENDAR_TIME_BETWEEN_TIME = 5;
 	public static final int CALENDAR_START_HOUR = 7;
 	public static final int CALENDAR_END_HOUR = 21;
+	
+	public static final String PROJECT_PATH = Const.class.getProtectionDomain().getCodeSource().getLocation().getPath().replace("/bin", "");;
 
 	
 	public static String getDayOfTheWeek(int i) {

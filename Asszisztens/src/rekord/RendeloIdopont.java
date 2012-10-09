@@ -2,7 +2,7 @@ package rekord;
 
 import java.util.Date;
 
-import tools.ProjectContants;
+import tools.Const;
 
 import com.ibm.icu.text.SimpleDateFormat;
 import com.ibm.icu.util.Calendar;
@@ -80,7 +80,7 @@ public class RendeloIdopont {
 		SimpleDateFormat formatTime = new SimpleDateFormat("HH:mm");
 		
 		if (alkalomTipus.equals("ismetlodo")){
-			data = "Ismétlődő, minden héten: "+ProjectContants.getDayOfTheWeek(tolC.get(Calendar.DAY_OF_WEEK))+", "+formatTime.format(tol)+" - "+formatTime.format(ig);
+			data = "Ismétlődő, minden héten: "+Const.getDayOfTheWeek(tolC.get(Calendar.DAY_OF_WEEK))+", "+formatTime.format(tol)+" - "+formatTime.format(ig);
 		} else if (alkalomTipus.equals("alkalmi")){
 			data = "Alkalmi, ekkor: "+format.format(tol)+", "+formatTime.format(tol)+" - "+formatTime.format(ig);
 		} else if (alkalomTipus.equals("lemondas")){
