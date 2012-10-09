@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -12,14 +14,17 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 
 import layout.SpringUtilities;
@@ -49,7 +54,6 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 	private static final long serialVersionUID = -4202548799866747834L;
 	static PDDocument doc = null;
 	static String inputFile;
-	static JFrame frame;
 	static File file;
 	private URL url;
 	private String extension;
@@ -67,6 +71,10 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 	JPanel panel;
 	private String previewString = "Előnézethez nyomja meg az 'Előnézet' gombot Megnyitás után!";
 	private PDDocument watermarkDoc;
+	private ArrayList<String> strings;
+	private JFrame editFrame;
+	private JTextField[] textTomb;
+	private JPanel editorPanel;
 	
 	/**
 	 * A foprogram
@@ -356,7 +364,7 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 			}
 			
 			saveFile.setEnabled(true);
-			editFile.setEnabled(false);
+			editFile.setEnabled(true);
 			preview.setEnabled(true);
 			cancel.setEnabled(true);
 			openFile.setEnabled(false);
@@ -442,6 +450,141 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 		extension = null;
 	}
 	
+	private ArrayList<String> getStrings() throws UnsupportedEncodingException, IOException {
+		ArrayList<String> result = new ArrayList<String>();
+		List<?> pages = doc.getDocumentCatalog().getAllPages();
+        for( int i=0; i<pages.size(); i++ )
+        {
+            PDPage page = (PDPage)pages.get( i );
+            PDStream contents = page.getContents();
+            PDFStreamParser parser = new PDFStreamParser(contents.getStream() );
+            parser.parse();
+            List<?> tokens = parser.getTokens();
+            for( int j=0; j<tokens.size(); j++ )
+            {
+                Object next = tokens.get( j );
+                if( next instanceof PDFOperator )
+                {
+                    PDFOperator op = (PDFOperator)next;
+                    if( op.getOperation().equals( "Tj" ) )
+                    {
+                        COSString previous = (COSString)tokens.get( j-1 );
+                        String string = previous.getString();
+                        result.add(string);
+                        previous.reset();
+                        previous.append( string.getBytes("ISO-8859-1") );
+                    }
+                    else if( op.getOperation().equals( "TJ" ) )
+                    {
+                        COSArray previous = (COSArray)tokens.get( j-1 );
+                        for( int k=0; k<previous.size(); k++ )
+                        {
+                            Object arrElement = previous.getObject( k );
+                            if( arrElement instanceof COSString )
+                            {
+                                COSString cosString = (COSString)arrElement;
+                                String string = cosString.getString();
+                                result.add(string);
+                                cosString.reset();
+                                cosString.append( string.getBytes("ISO-8859-1") );                        
+                            }
+                        }
+                    }
+                }
+            }
+            PDStream updatedStream = new PDStream(doc);
+            OutputStream out = updatedStream.createOutputStream();
+            ContentStreamWriter tokenWriter = new ContentStreamWriter(out);
+            tokenWriter.writeTokens( tokens );
+            page.setContents( updatedStream );
+        }
+		return result;
+	}
+	
+	public void editWindow(ArrayList<String> s){
+		int width = 650;
+		int height = 600;
+		
+		this.setEnabled(false);
+		editFrame = new JFrame("Szerkesztés");
+		editFrame.setLayout(new BorderLayout());
+		
+		editorPanel = new JPanel();
+		JScrollPane scrollPanel = new JScrollPane(editorPanel);
+		
+		editFrame.add(scrollPanel,"Center");
+		
+		JButton okay = new JButton("Rendben");
+		okay.addActionListener(this);
+		okay.setActionCommand("okayEdit");
+		
+		editFrame.add(okay,"South");
+		
+		editorPanel.setLayout(new BoxLayout(editorPanel, BoxLayout.Y_AXIS));
+		
+		textTomb = new JTextField[strings.size()];
+		
+		Iterator<String> ite = strings.iterator();
+		int i = 0;
+		while (ite.hasNext()){
+    		String string = ite.next();
+    		//System.out.println(string);
+    		
+    		textTomb[i] = new JTextField(string);
+    		editorPanel.add(textTomb[i]);
+    		
+    		i++;
+    	}
+		
+		scrollPanel.setPreferredSize(new Dimension(width-10,height-60));
+		scrollPanel.setSize(new Dimension(width-10,height-60));
+		editFrame.setPreferredSize(new Dimension(width,height));
+		editFrame.setSize(new Dimension(width,height));
+		editFrame.setLocation((screenWidth-editFrame.getWidth())/2, (screenHeight-editFrame.getHeight()-taskBar)/2);	
+		editFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		editFrame.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+            	Object[] options = {"Igen","Nem"};
+            	boolean sure = BaseWindow.ask(options, "Megerősítés", "A nem mentett módosítások elvesznek! Biztosan kilép?", new JFrame());
+            	if (sure){
+    		        exitEditor();
+            	}
+            	
+		     }
+		});
+		editFrame.setResizable(false);
+		editFrame.setVisible(true);
+	}
+	
+	public void exitEditor(){
+		textTomb = null;
+        strings = null;
+        editorPanel.removeAll();
+		editFrame.dispose();
+		this.setEnabled(true);
+		this.toFront();
+		this.repaint();
+	}
+	
+	public void editReplace(){
+		int i = 0;
+		Iterator<String> it = strings.iterator();
+		
+		while (it.hasNext()){
+			String s = it.next();
+			if (!s.equals(textTomb[i].getText())){
+				try {
+					replace(s, textTomb[i].getText());
+					System.out.println(s);
+				} catch (IOException e) {
+					BaseWindow.makeWarning("Hiba cserélés közben! Nem sikerült ezt a sort felülírni: "+s, e, "error", this);
+				}
+			}
+			
+			i++;
+		}
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String cmd = e.getActionCommand();
@@ -465,6 +608,20 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 		} else if (cmd.equals("saveFile")){
 			finalize();
 			cancel();
+		} else if (cmd.equals("editFile")){
+			try {
+				strings = getStrings();
+				editWindow(strings);
+			} catch (UnsupportedEncodingException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		} else if (cmd.equals("okayEdit")){
+			editReplace();
+			exitEditor();
 		}
 	}
 }

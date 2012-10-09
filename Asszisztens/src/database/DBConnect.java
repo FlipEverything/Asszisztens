@@ -7,8 +7,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import javax.swing.JFrame;
-import javax.swing.JProgressBar;
-import javax.swing.UIManager;
 
 import GUI.BaseWindow;
 
@@ -22,29 +20,12 @@ public class DBConnect {
 	private ResultSet result;
 	private int workingConn = -1;
 	private DatabaseMirrors acc;
-	private JProgressBar pb;
 	
 	public DBConnect(){
-		JFrame f = new JFrame("Kapcsolódás az adatbázishoz");
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			System.setProperty("apple.laf.useScreenMenuBar", "true");
-            System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Test");
-		} catch (Exception e) {
-			BaseWindow.makeWarning("Nem lehet a kinézetet beállítani!", e, "error", f);
-		}	
-        
-        f.setTitle("Bejelentkezés");
-        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
-        pb = new JProgressBar();
-        
-        f.add(pb);
-        
 		connectionStatus = connectToDatabase();
 		if (connectionStatus == false){
 			Object[] o = {"Igen","Nem"};
-			boolean ask = BaseWindow.ask(o, "Sikertelen kapcsolatlétrehozás", "Nem sikerült egyik adatbázisszerverhez se kapcsolódni! Folytatja a munkát offline módban?", new JFrame());
+			boolean ask = BaseWindow.ask(o, "Sikertelen kapcsolatlétrehozás", "Elindítsam offline módban?", new JFrame());
 			if (ask == false){
 				System.exit(0);
 			}
@@ -68,12 +49,14 @@ public class DBConnect {
 				    workingConn=i;
 				    return true;
 				} catch (SQLException ex) {
-					BaseWindow.makeWarning("Nem tudok kapcsolódni a szerverhez!", ex, "error", new JFrame());
-					Object[] o = {"Igen", "Nem"};
-					//boolean b = BaseWindow.ask(o, "Hiba az adatbáziskapcsolatban!", "Nem sikerült az előző kapcsolatot felépíteni! Megpróbál kapcsolatot létesíteni a tükörszerverrel?", new JFrame());
-					/*if (b == false){
-						System.exit(0);
-					}*/
+					//BaseWindow.makeWarning("Nem tudok kapcsolódni a szerverhez!", ex, "error", new JFrame());
+					if (i!=acc.getCounter()){
+						Object[] o = {"Igen", "Nem"};
+						boolean b = BaseWindow.ask(o, "Nem sikerült a kapcsolatot felépíteni", "Megpróbál kapcsolatot létesíteni a tükörszerverrel?", new JFrame());
+						if (b == false){
+							System.exit(0);
+						}
+					}					
 				}
 			}
 		}
