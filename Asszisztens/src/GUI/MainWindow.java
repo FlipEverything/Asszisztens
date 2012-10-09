@@ -30,8 +30,6 @@ import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 
-import org.apache.pdfbox.filter.JBIG2Filter;
-
 import tools.Const;
 
 import GUI.CentrumLab;
