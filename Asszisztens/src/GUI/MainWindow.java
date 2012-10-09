@@ -17,14 +17,22 @@ import java.sql.SQLException;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
+import javax.swing.border.TitledBorder;
+
+import org.apache.pdfbox.filter.JBIG2Filter;
+
+import tools.Const;
 
 import GUI.CentrumLab;
 import database.DBConnect;
@@ -65,6 +73,7 @@ public class MainWindow implements ActionListener{
 	private LabCashWindow labCashWindow;
 	private DoctorScheduleWindow doctorScheduleWindow;
 	private CentrumLab c;
+	private JPanel mainMessagePanel;
 	
 	public MainWindow(){
 		
@@ -117,8 +126,21 @@ public class MainWindow implements ActionListener{
 			newJMenuItem("about", "Névjegy", "", true);
 			newJMenuItem("help", "Segítség", "", false);
 		
-		mainCenterPanel.setLayout(new BoxLayout(mainCenterPanel, BoxLayout.LINE_AXIS));
 			
+		
+		mainCenterPanel.setLayout(new BoxLayout(mainCenterPanel, BoxLayout.Y_AXIS));
+		TitledBorder title;
+		title = BorderFactory.createTitledBorder("Gyorsmenü");
+		mainCenterPanel.setBorder(title);
+		
+		
+		JButton centrumLab = new JButton("CentrumLab lelet", new ImageIcon(Const.PROJECT_PATH+"icons/centrumlab.png"));
+		centrumLab.addActionListener(this);
+		centrumLab.setActionCommand("centrumlab");
+		centrumLab.setFocusable(false);
+		
+		mainCenterPanel.add(centrumLab);
+				
 		window.setTitle(titleString());
 		window.setSize( new Dimension( width, height ) );	
 		window.setLocation((screenWidth-window.getWidth())/2, (screenHeight-window.getHeight())/2);
@@ -132,7 +154,11 @@ public class MainWindow implements ActionListener{
 	            	exit();
 	            }
 	    });
-		window.add(mainCenterPanel,"Center");
+		
+		
+		JSplitPane mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,mainCenterPanel,mainMessagePanel);
+		
+		window.add(mainSplit,"Center");
 		statusLabel.setBorder(BorderFactory.createLoweredBevelBorder());
 		window.add(statusLabel,"South");
 	    if (fullScreen){
@@ -145,6 +171,7 @@ public class MainWindow implements ActionListener{
 		connect();
 		window = new JFrame();
 		mainCenterPanel = new JPanel();
+		mainMessagePanel = new JPanel();
 		command = new DatabaseModify(mysql);
 		admin = new User(mysql);
 		menuBar = new JMenuBar();
