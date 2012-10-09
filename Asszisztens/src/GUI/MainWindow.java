@@ -97,9 +97,9 @@ public class MainWindow implements ActionListener{
 			newJMenuItem("update", "Frissítés keresése", "", true);	
 			newJMenuItem("exit", "Kilépés", KeyEvent.VK_X, "", true);	
 		newJMenu("Lelet átalakítás", KeyEvent.VK_F, "Lelet menü");
-			newJMenuItem("centrumlab", "Centrumlab lelet feldolgozás", "", true); 
+			newJMenuItem("centrumlab", "Centrumlab lelet feldolgozás", "", true, new ImageIcon(Const.PROJECT_PATH+"icon_centrumlab.png")); 
 		newJMenu("Rendelő nyilvántartás", KeyEvent.VK_F, "Lelet menü");
-			newJMenuItem("rendeloBeosztas", "Rendelő beosztás", "", true);
+			newJMenuItem("rendeloBeosztas", "Rendelő beosztás", "", true, new ImageIcon(Const.PROJECT_PATH+"icon_calendar.png"));
 			newJMenuItem("penztar", "Betegelőjegyzés (időpontkiadás)", "", false);
 			newJMenuItem("penztar", "Laborvizsgálat árszámító", "", true);
 			newJMenuItem("penztar", "WebLabor", "", false);
@@ -126,18 +126,24 @@ public class MainWindow implements ActionListener{
 		
 			
 		
-		mainCenterPanel.setLayout(new BoxLayout(mainCenterPanel, BoxLayout.Y_AXIS));
+		mainCenterPanel.setLayout(new BoxLayout(mainCenterPanel, BoxLayout.X_AXIS));
 		TitledBorder title;
 		title = BorderFactory.createTitledBorder("Gyorsmenü");
 		mainCenterPanel.setBorder(title);
 		
 		
-		JButton centrumLab = new JButton("CentrumLab lelet", new ImageIcon(Const.PROJECT_PATH+"centrumlab.png"));
+		JButton centrumLab = new JButton("CentrumLab lelet", new ImageIcon(Const.PROJECT_PATH+"icon_centrumlab.png"));
 		centrumLab.addActionListener(this);
 		centrumLab.setActionCommand("centrumlab");
 		centrumLab.setFocusable(false);
 		
+		JButton calendar = new JButton("Rendelő beosztás", new ImageIcon(Const.PROJECT_PATH+"icon_calendar.png"));
+		calendar.addActionListener(this);
+		calendar.setActionCommand("rendeloBeosztas");
+		calendar.setFocusable(false);
+		
 		mainCenterPanel.add(centrumLab);
+		mainCenterPanel.add(calendar);
 				
 		window.setTitle(titleString());
 		window.setSize( new Dimension( width, height ) );	
@@ -219,6 +225,15 @@ public class MainWindow implements ActionListener{
 	
 	public void newJMenuItem(String itemName, String label, String description, boolean enabled){
 		JMenuItem item = new JMenuItem(label);
+		item.setActionCommand(itemName);
+		item.setEnabled(enabled);
+		item.getAccessibleContext().setAccessibleDescription(description);
+		item.addActionListener(this);
+		menu.add(item);
+	}
+	
+	public void newJMenuItem(String itemName, String label, String description, boolean enabled, ImageIcon icon){
+		JMenuItem item = new JMenuItem(label, icon);
 		item.setActionCommand(itemName);
 		item.setEnabled(enabled);
 		item.getAccessibleContext().setAccessibleDescription(description);

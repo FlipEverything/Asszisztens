@@ -145,22 +145,22 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 
 	
 	public void init(){
-		openFile = new JButton("Megnyitás", new ImageIcon(Const.PROJECT_PATH+"open.png"));
+		openFile = new JButton("Megnyitás", new ImageIcon(Const.PROJECT_PATH+"icon_open.png"));
 		openFile.addActionListener(this);
 		openFile.setActionCommand("openFile");
 		
-		editFile = new JButton("Szerkesztés", new ImageIcon(Const.PROJECT_PATH+"edit.png"));
+		editFile = new JButton("Szerkesztés", new ImageIcon(Const.PROJECT_PATH+"icon_edit.png"));
 		editFile.addActionListener(this);
 		editFile.setActionCommand("editFile");
 		editFile.setEnabled(false);
 		
-		saveFile = new JButton("Mentés", new ImageIcon(Const.PROJECT_PATH+"save.png"));
+		saveFile = new JButton("Mentés", new ImageIcon(Const.PROJECT_PATH+"icon_save.png"));
 		saveFile.addActionListener(this);
 		saveFile.setActionCommand("saveFile");
 		saveFile.setEnabled(false);
 		
 		
-		cancel = new JButton("Mégsem", new ImageIcon(Const.PROJECT_PATH+"cancel.png"));
+		cancel = new JButton("Mégsem", new ImageIcon(Const.PROJECT_PATH+"icon_cancel.png"));
 		cancel.addActionListener(this);
 		cancel.setActionCommand("cancel");
 		cancel.setEnabled(false);
@@ -510,7 +510,7 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 		
 		editFrame.add(scrollPanel,"Center");
 		
-		JButton okay = new JButton("Rendben", new ImageIcon(Const.PROJECT_PATH+"save.png"));
+		JButton okay = new JButton("Rendben", new ImageIcon(Const.PROJECT_PATH+"icon_save.png"));
 		okay.addActionListener(this);
 		okay.setActionCommand("okayEdit");
 		
