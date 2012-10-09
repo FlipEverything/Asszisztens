@@ -132,7 +132,7 @@ public class MainWindow implements ActionListener{
 		mainCenterPanel.setBorder(title);
 		
 		
-		JButton centrumLab = new JButton("CentrumLab lelet", new ImageIcon(Const.PROJECT_PATH+"icons/centrumlab.png"));
+		JButton centrumLab = new JButton("CentrumLab lelet", new ImageIcon(Const.PROJECT_PATH+"centrumlab.png"));
 		centrumLab.addActionListener(this);
 		centrumLab.setActionCommand("centrumlab");
 		centrumLab.setFocusable(false);
