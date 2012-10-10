@@ -45,6 +45,7 @@ public class DBConnect {
 	public void startTheConnection(){	
 		pLabel.setForeground(Color.BLACK);
 		pLabel.setText("(OFFLINE) Kapcsolodas...");
+		pBar.setIndeterminate(true);
 		class ConnectToDatabaseThread extends Thread{
 			public void run(){						
 				if (acc.getCounter()==-1){
@@ -68,9 +69,23 @@ public class DBConnect {
 						}
 					}
 					if (connectionStatus==false){
+						int sec = 30;
 						pLabel.setForeground(Color.RED);
-						pLabel.setText("(OFFLINE) Nem sikerult kapcsolodni... ");
 						pBar.setIndeterminate(false);
+						pBar.setMaximum(sec);
+						pBar.setValue(0);
+						for (int i=sec; i>0; i--){
+							pLabel.setText("(OFFLINE) Nem sikerult kapcsolodni... Ujrakapcsolodas "+i+" masodperc mulva.");
+							pBar.setValue(pBar.getValue()+1);
+							try {
+								sleep(1000);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+						
+						startTheConnection();
 					}
 				}
 				
@@ -84,11 +99,14 @@ public class DBConnect {
 	
 
 	public void exec(String sql) throws SQLException{
+		if ((conn.isClosed()==true) && (conn!=null)){
+			startTheConnection();
+		}
+		
 			setS(conn.createStatement());
 			s.execute(sql);
 			setResult(s.getResultSet());
-		
-		
+				
 	}
 	
 	public void open(DatabaseMirrors acc, int i) throws SQLException{
