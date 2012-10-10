@@ -179,11 +179,7 @@ public class DoctorScheduleDataWindow extends BaseWindow implements ActionListen
 	                    null,
 	                    list.getSelectedValue().toString());
 				if ((s != null) && (s.length() > 0)) {
-					try {
-						dsObject.edit(command, list.getSelectedValue().toString(), s);
-					} catch (SQLException e) {
-						BaseWindow.makeWarning("Hiba szerkesztés közben!", e, "error", (JFrame)this);
-					}
+					dsObject.edit(command, list.getSelectedValue().toString(), s);
 					refreshLists();
 				}
 			} else {
@@ -193,11 +189,7 @@ public class DoctorScheduleDataWindow extends BaseWindow implements ActionListen
 			if (list.getSelectedIndex()!=-1){
 				Object[] o = {"Igen","Nem"};
 				if (ask(o, "Biztosan törlöd?", list.getSelectedValue().toString(), (JFrame)this)==true){
-					try {
-						dsObject.delete(command, list.getSelectedValue().toString());
-					} catch (SQLException e) {
-						BaseWindow.makeWarning("Hiba törlés közben!", e, "error", (JFrame)this);
-					}
+					dsObject.delete(command, list.getSelectedValue().toString());
 					refreshLists();				
 				}
 			} else {
@@ -210,11 +202,7 @@ public class DoctorScheduleDataWindow extends BaseWindow implements ActionListen
                     "Új felvitele",
                     JOptionPane.PLAIN_MESSAGE);
 			if ((s2 != null) && (s2.length() > 0)) {
-				try {
-					dsObject.insert(command, s2);
-				} catch (SQLException e) {
-					BaseWindow.makeWarning("Hiba létrehozás közben!", e, "error", (JFrame)this);
-				}
+				dsObject.insert(command, s2);
 				refreshLists();	
 			}
 		}

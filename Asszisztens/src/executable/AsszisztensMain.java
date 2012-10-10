@@ -41,9 +41,6 @@ public class AsszisztensMain{
 			new AsszisztensMain();
 		} catch (SQLException e) {
 			BaseWindow.makeWarning("SQL parancsfuttatási hiba!", e, "error", new JFrame());
-		} catch (Exception e){
-			BaseWindow.makeWarning("Hiba!", e, "error", new JFrame());
-			exit();
 		}
 	}
 	

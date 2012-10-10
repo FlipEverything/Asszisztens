@@ -242,10 +242,6 @@ public class DoctorScheduleNewWindow extends BaseWindow implements ActionListene
 						dsObject.addNewSchedule(tol, ig, szobaId, o.getId(), alkalom);
 					} catch (NumberFormatException e1) {
 						BaseWindow.makeWarning("Nem sikerült létrehozni az időpontot!", e1, "error", (JFrame)this);
-					} catch (SQLException e1) {
-						BaseWindow.makeWarning("Nem sikerült létrehozni az időpontot!", e1, "error", (JFrame)this);
-					} catch (ParseException e1) {
-						BaseWindow.makeWarning("Nem sikerült létrehozni az időpontot!", e1, "error", (JFrame)this);
 					}
 					resetForm();
 					enableForm();

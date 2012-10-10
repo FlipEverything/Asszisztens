@@ -7,7 +7,6 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Iterator;
@@ -52,6 +51,8 @@ public class DoctorScheduleWindow extends BaseWindow{
 	
 	private JPanel colors;
 	
+	private boolean firstDownload;
+	
 	public DoctorScheduleWindow(DBConnect mysql){
 		super(0, 0, true, false, "Rendelő beosztás - Orvosok", 0, 0, JFrame.DISPOSE_ON_CLOSE, false);
 		
@@ -64,14 +65,17 @@ public class DoctorScheduleWindow extends BaseWindow{
 			newJMenuItem("delete", "Szabadság bejegyzése (ismétlődő időpont)", "", false);
 		setMenu();
 		
-		try {
-			dsObject = new DoctorScheduleDatabase(mysql);
-		} catch (SQLException e) {
-			makeWarning("SQL Hiba!", e, "error", this);
-		}
+		dsObject = new DoctorScheduleDatabase(mysql);
 		
+		setFirstDownload(false);
+	}
+	
+	public void startTransaction(){
+		dsObject.downloadIdopont();
+		dsObject.downloadOrvos();
+		dsObject.downloadSzoba();
 		
-		init();
+init();
 		
 		setLayout(new BorderLayout());
 		
@@ -149,6 +153,8 @@ public class DoctorScheduleWindow extends BaseWindow{
 		add(topPanel,"North");
 		add(bottom,"Center");
 		add(colors,"South");
+		
+		setFirstDownload(true);
 	}
 	
 	public void generateColorsPanel(){
@@ -358,5 +364,13 @@ public class DoctorScheduleWindow extends BaseWindow{
 			calendar.validate();
 			calendar.repaint();
 		}
+	}
+
+	public boolean isFirstDownload() {
+		return firstDownload;
+	}
+
+	public void setFirstDownload(boolean firstDownload) {
+		this.firstDownload = firstDownload;
 	}
 }

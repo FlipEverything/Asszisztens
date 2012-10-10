@@ -20,10 +20,8 @@ import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
@@ -48,8 +46,6 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 	private JPanel gombok;
 	private JPanel keresoPanel;
 	private JLabel kasszaVegosszeg;
-	private JPanel loadingBar;
-	private JProgressBar pb;
 	private JButton deselectAll;
 	private JTextField kereses;
 	
@@ -77,7 +73,7 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 	//Database connection
 	private LabCash labCash;
 	private int fizetendo;
-	private boolean firstDownload = true;
+	private boolean firstDownload;
 	
 	public LabCashWindow(DBConnect mysql){
 		super(preferredWidth, preferredHeight, resizable, visible, title, locationX, locationY, defaultCloseOperation, exit);
@@ -90,6 +86,8 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 			newJMenuItem("reLoad", "Adatok újraletöltése", "", true);
 		setMenu();
 		createWindowContent();
+		
+		setFirstDownload(false);
 	}
 	
 	public void initComponents(){
@@ -104,8 +102,6 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 		kereses = new JTextField();
 		keresoPanel = new JPanel();
 		kasszaVegosszeg = new JLabel();
-		loadingBar = new JPanel();
-		pb = new JProgressBar();
 	}
 	
 	public void deleteComponents(){
@@ -120,8 +116,6 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 		kereses = null;
 		keresoPanel = null;
 		kasszaVegosszeg = null;
-		loadingBar = null;
-		pb = null;
 		labCash = null;
 	}
 	
@@ -164,70 +158,48 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 		kasszaVegosszeg.setSize(width, height);
 		also.add(kasszaVegosszeg,"East");
 			
-		loadingBar.setLayout(new BorderLayout());
-		loadingBar.setPreferredSize(new Dimension(width, height));
-		loadingBar.add(new JLabel("<html><b><span style='font-size: 30px; text-align: center;'>Adatok letöltése folyamatban...</span></html>",SwingConstants.CENTER),"Center");
-		
-		add(loadingBar,"Center");
-		add(pb,"South");
+		setLayout(new BorderLayout());
+		add(felsoScroll,"Center");
+		add(lista,"East");
+		add(keresoPanel,"North");
+		add(also,"South");
 			
 		/////////////////////////////////////UPDATE///////////////////////////////
 		SwingUtilities.updateComponentTreeUI(this);
 		///////////////////////////////////UPDATE/////////////////////////////////
 	
 		this.setFizetendo(0);
-		
-		try {
-			this.setFizetendo(labCash.downloadAlapdij());
-		} catch (SQLException e) {
-			BaseWindow.makeWarning("SQL parancsfuttatási hiba!", e, "error", this);
-		}
 	}
 	
 	public void startTransaction(){
-		class DownloadThread extends Thread{
-			LabCash lc;
 			
-			public DownloadThread(LabCash lc){
-				this.lc = lc;
-			}
-			
-			public void run(){				
-				try {				
-					Iterator<Labor> rekordIt = lc.downloadResult().iterator();
-					int elozo = 0;
-					while ( rekordIt.hasNext() ){
-				    	Labor j = rekordIt.next();
-				    	if (elozo!=j.getCsoport()){
-				    		ResultSet rs = labCash.getItems(j.getCsoport());
-				    		if (rs.next() == true ){
-				    			String labelText = "<html><table><tr style='background-color: #5AAD41; color: white;'><td style='width: "+(felsoScroll.getPreferredSize().width-componentWidth)+"px;'><b>"+rs.getString("nev")+"</b></td></tr></table></html>";
-				    			felso.add(new JLabel(labelText));				    			
-				    		}
-				    	}
-				    	rekordPaint(j);
-				    	elozo = j.getCsoport();
-				    	pb.setValue(pb.getValue()+1);
-				    }
-					
-					remove(loadingBar);
-					remove(pb);
-					setLayout(new BorderLayout());
-					add(felsoScroll,"Center");
-					add(lista,"East");
-					add(keresoPanel,"North");
-					add(also,"South");
-					refreshWithNewDatas();
-				    refresh();
-				    
-				} catch (SQLException e) {
-					BaseWindow.makeWarning("SQL parancsfuttatási hiba!", e, "error", new JFrame());
-				}		
-			}
-		}
+			try {	
+				setFizetendo(labCash.downloadAlapdij());
+				
+				Iterator<Labor> rekordIt = labCash.downloadResult().iterator();
+				int elozo = 0;
+				while ( rekordIt.hasNext() ){
+			    	Labor j = rekordIt.next();
+			    	if (elozo!=j.getCsoport()){
+			    		ResultSet rs = labCash.getItems(j.getCsoport());
+			    		if (rs.next() == true ){
+			    			String labelText = "<html><table><tr style='background-color: #5AAD41; color: white;'><td style='width: "+(felsoScroll.getPreferredSize().width-componentWidth)+"px;'><b>"+rs.getString("nev")+"</b></td></tr></table></html>";
+			    			felso.add(new JLabel(labelText));				    			
+			    		}
+			    	}
+			    	rekordPaint(j);
+			    	elozo = j.getCsoport();
+			    }
+				
+				refreshWithNewDatas();
+			    refresh();
+			    
+			    setFirstDownload(true);
+			    
+			} catch (SQLException e) {
+				BaseWindow.makeWarning("SQL parancsfuttatási hiba!", e, "error", new JFrame());
+			}		
 		
-		DownloadThread d = new DownloadThread(labCash);
-		d.start();	
 	}
 	
 	public void rekordPaint(Labor j){

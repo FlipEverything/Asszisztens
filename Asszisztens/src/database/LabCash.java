@@ -11,7 +11,7 @@ public class LabCash {
 	private ArrayList<Labor> laborLista;
 	
 	public LabCash(DBConnect mysql){
-		this. mysql = mysql;
+		this.mysql = mysql;
 		laborLista = new ArrayList<Labor>();
 	}
 	

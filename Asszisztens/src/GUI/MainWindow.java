@@ -64,13 +64,11 @@ public class MainWindow implements ActionListener{
 	
 	private String status;
 	private String serverDetails;
-	private User admin;
-	private static DBConnect mysql;
+	private DBConnect mysql;
 	private DatabaseModify command;
-	private JLabel loginData;
 	
-	private static LabCashWindow labCashWindow;
-	private static DoctorScheduleWindow doctorScheduleWindow;
+	private LabCashWindow labCashWindow;
+	private DoctorScheduleWindow doctorScheduleWindow;
 	private CentrumLab c;
 	private JPanel mainMessagePanel;
 	private JProgressBar connectionProgress;
@@ -95,7 +93,6 @@ public class MainWindow implements ActionListener{
 		
 	    /** A menusor letrehozasa, beallitasa, hozzaadasa az ablakhoz */
 		newJMenu("Fájl", KeyEvent.VK_F, "Fájl menü");
-			newJMenuItem("reConnect", "Újrakapcsolódás", "", true);
 			newJMenuItem("update", "Frissítés keresése", "", true);	
 			newJMenuItem("exit", "Kilépés", KeyEvent.VK_X, "", true);	
 		newJMenu("Lelet átalakítás", KeyEvent.VK_F, "Lelet menü");
@@ -110,17 +107,10 @@ public class MainWindow implements ActionListener{
 			newJMenuItem("szerkesztOrvos", "Orvos szerkesztése (Még nincs...)", "");
 			newJMenuItem("arajanlatKeres", "Árajánlat kérések", "");*/
 		newJMenu("Admin", KeyEvent.VK_F, "Admin");
-			newJMenuItem("adminLogin", "Admin belépés/kilépés", "", true);
-			newJMenuItem("adminPasswordChange", "Admin jelszóváltás", "", false);
 			newJMenuItem("kategoriaUj", "Új kategória felvitele", "", true);
 			newJMenuItem("kategoriaSzerk", "Kategória szerkesztése", "", false);
 			newJMenuItem("laborUj", "Új laborvizsgálat felvitele", "", true);
 			newJMenuItem("laborSzerk", "Laborvizsgálat szerkesztése", "", true);
-		/*newJMenu("Rendelő beosztás", KeyEvent.VK_K, "Rendelő beosztás");
-			newJMenuItem("beosztasTorzsadat", "Törzsadat felvitel", "");
-			newJMenuItem("beosztasLekerdezes", "Lekérdezés (Naptár)", "");
-			newJMenuItem("beosztasUj", "Új foglalás (rendelési időpont) felvitele", "");
-			newJMenuItem("beosztasTorol", "Foglalás (rendelési időpont) törlése", "");*/
 		newJMenu("Súgó", KeyEvent.VK_S, "");
 			newJMenuItem("errorReport", "Hibabejelentés", "", false);
 			newJMenuItem("about", "Névjegy", "", true);
@@ -155,6 +145,7 @@ public class MainWindow implements ActionListener{
 		window.setDefaultCloseOperation( defaultCloseOperation );
         window.setLayout(new BorderLayout());
 		window.setJMenuBar(menuBar);
+		
 		window.addWindowListener(new WindowAdapter() {
 	            public void windowClosing(WindowEvent e) {
 	            	exit();
@@ -190,36 +181,41 @@ public class MainWindow implements ActionListener{
 		connectionProgress = new JProgressBar();
 		connectionProgress.setIndeterminate(true);
 		statusLabel = new JLabel();
+		window = new JFrame();
+		mainCenterPanel = new JPanel();
+		mainMessagePanel = new JPanel();
+		
+		menuBar = new JMenuBar();
+		menu = new JMenu();
 		
 		mysql = new DBConnect();
 		mysql.setpBar(connectionProgress);
 		mysql.setpLabel(statusLabel);
 		mysql.startTheConnection();
 		
-		downloadDatas();
-		
-		window = new JFrame();
-		mainCenterPanel = new JPanel();
-		mainMessagePanel = new JPanel();
-		command = new DatabaseModify(mysql);
-		admin = new User(mysql);
-		menuBar = new JMenuBar();
-		menu = new JMenu();
+		labCashWindow = new LabCashWindow(mysql);
+		doctorScheduleWindow = new DoctorScheduleWindow(mysql);
 		c = new CentrumLab();
-	
+		
+		command = new DatabaseModify(mysql);
+		
+		downloadDatas();
 	}
 	
-	public static void downloadDatas(){
+	public void downloadDatas(){
 		class T extends Thread {
+			
 			boolean downloaded = false;
+			
 	         public void run() {
 	        	while (!downloaded){
-	        		if (mysql.isConnectionStatus()){
+	        		
+	        		if (mysql.isConnectionStatus()){	        			
+	        			labCashWindow.startTransaction();
+	        			doctorScheduleWindow.startTransaction();
 	        			downloaded = true;
-	        			System.out.println(mysql.isConnectionStatus());
-		        		if (labCashWindow==null) labCashWindow = new LabCashWindow(mysql);
-						if (doctorScheduleWindow==null) doctorScheduleWindow = new DoctorScheduleWindow(mysql);	
 		        	}
+	        		
 	        	}
 	        		
 	        	}	        		        		
@@ -272,9 +268,11 @@ public class MainWindow implements ActionListener{
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		
 		String cmd = e.getActionCommand();
 		boolean runAnotherCommand = false;
-		//CHECK ONLINE, ADMIN
+		
+		//CHECK ONLINE
 		if (
 				cmd.equals("adminPasswordChange") || 
 				cmd.equals("kategoriaUj") ||
@@ -285,20 +283,7 @@ public class MainWindow implements ActionListener{
 				cmd.equals("laborTorol") ||
 				cmd.equals("ujOrvos") ||
 				cmd.equals("szerkesztOrvos") ||
-				cmd.equals("arajanlatKeres")
-			){
-				if (mysql.isConnectionStatus()==false){
-					BaseWindow.makeWarning("Offline módban ez a funkció nem elérhető!", new Exception(), "success", new JFrame());
-				} else {
-					if (admin.isLoggedIn()==false){
-						BaseWindow.makeWarning("Be kell jelentkezned ennek a funkciónak a használatához!", new Exception(), "success", new JFrame());
-					} else {
-						runAnotherCommand = true;
-					}
-				}
-		}
-		//CHECK ONLINE
-		if (
+				cmd.equals("arajanlatKeres") || 		
 				cmd.equals("adminLogin") || 
 				cmd.equals("kereses") || 
 				cmd.equals("penztar") ||
@@ -306,33 +291,14 @@ public class MainWindow implements ActionListener{
 				cmd.equals("arfolyamBeallit") ||
 				cmd.equals("arfolyamLekerdezes") ||
 				cmd.equals("rendeloBeosztas")
-			
 			){
 				if (mysql.isConnectionStatus()==false){
 					BaseWindow.makeWarning("Offline módban ez a funkció nem elérhető!", new Exception(), "success", new JFrame());
 				} else {
 					runAnotherCommand = true;
 				}
-		}
-		//CHECK OFFLINE
-		if (
-				cmd.equals("reConnect")
-			){
-				if (mysql.isConnectionStatus()==true){
-					BaseWindow.makeWarning("Már kapcsolódva van az adatbázisszerverhez!", new Exception(), "success", new JFrame());
-				} else {
-					runAnotherCommand = true;
-				}
-		}
-		//CHECK OFFLINE, NOT ADMIN
-		if (
-				cmd.equals("centrumlab") ||
-				cmd.equals("about") ||
-				cmd.equals("help") ||
-				cmd.equals("exit") ||
-				cmd.equals("update") 
-			){
-				runAnotherCommand = true;
+		} else {
+			runAnotherCommand = true;		
 		}
 		
 		if (runAnotherCommand == true){
@@ -340,39 +306,18 @@ public class MainWindow implements ActionListener{
 				c.setVisible(true);
 			} else if (cmd=="exit"){
 				exit();
-			} else if (cmd=="reConnect"){
-				reConnect();
 			} else if (cmd=="update"){
 				searchForUpdates();
-			} else if (cmd=="adminLogin"){
-				try {
-					adminLogin();	
-				} catch (SQLException e1) {
-					BaseWindow.makeWarning("SQL parancsfuttatási hiba!", e1, "error", new JFrame());
-				}
-			} else if (cmd=="adminPasswordChange"){
-				//try {		
-					changePassword();
-				/*} catch (SQLException e1) {
-					Window.makeWarning("SQL parancsfuttatási hiba!", e1, "error", new JFrame());
-				}*/
 			} else if (cmd=="about"){
 				about();
 			} else if (cmd=="help"){
 				help();
 			} else if (cmd=="penztar"){
-				if (labCashWindow==null) 
+				if (!labCashWindow.isFirstDownload()) 
 					BaseWindow.makeWarning("Még folyik az adatletöltés", new Exception(), "success", new JFrame());
 				else {
 					labCashWindow.setVisible(true);
-					
-					if (labCashWindow.isFirstDownload()){
-						labCashWindow.startTransaction();
-						labCashWindow.setFirstDownload(false);
-					}
-				}
-					
-				
+				}		
 			} else if (cmd=="arfolyamFrissit"){
 				
 			} else if (cmd=="arfolyamBeallit"){
@@ -400,7 +345,7 @@ public class MainWindow implements ActionListener{
 			} else if (cmd=="szerkesztOrvos"){
 				
 			} else if (cmd.equals("rendeloBeosztas")){
-				if (doctorScheduleWindow==null) 
+				if (!doctorScheduleWindow.isFirstDownload()) 
 					BaseWindow.makeWarning("Még folyik az adatletöltés", new Exception(), "success", new JFrame());
 				else
 					doctorScheduleWindow.setVisible(true);
@@ -415,6 +360,7 @@ public class MainWindow implements ActionListener{
 	public void setWindow(JFrame window) {
 		this.window = window;
 	}
+	
 	public double getVersion()
 	{
 		double version = 0.0;
@@ -433,30 +379,6 @@ public class MainWindow implements ActionListener{
 		}
 		return version;
 	}
-
-
-	
-	public void connect(){
-		mysql = new DBConnect();
-		if (mysql.isConnectionStatus()==true){
-			status = "online";
-			serverDetails = " - "+mysql.getActiveServer()+"@"+mysql.getActiveDatabase();
-		} else {
-			status = "offline";
-			serverDetails = "";
-		}
-	}
-	
-	public void reConnect(){
-		mysql = new DBConnect();
-		if (mysql.isConnectionStatus()==true){
-			status = "online";
-			serverDetails = " - "+mysql.getActiveServer()+"@"+mysql.getActiveDatabase();
-			downloadDatas();
-		}
-		statusLabel.setText(getDatabaseStatus());
-		
-	}
 	
 	public void searchForUpdates() {
 		String[] run = {"java","-jar","AsszisztensUpdater.jar"};
@@ -470,18 +392,6 @@ public class MainWindow implements ActionListener{
 			}
         }
         exit();
-	}
-	
-	public void adminLogin() throws SQLException{
-		if (admin.isLoggedIn()==true)
-			admin.logout();
-		else
-			admin.makePanel(loginData);
-		
-	}
-
-	public void changePassword(){
-		BaseWindow.makeWarning("A funkció jeleneleg nem elérhető.", new Exception(), "success", new JFrame());
 	}
 	
 	public void about(){

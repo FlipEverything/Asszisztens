@@ -21,228 +21,266 @@ public class DoctorScheduleDatabase {
 	private ArrayList<RendeloSzoba> szobaTomb;
 	private ArrayList<RendeloIdopont> idopontTomb;
 	
-	public DoctorScheduleDatabase(DBConnect mysql) throws SQLException{
+	public DoctorScheduleDatabase(DBConnect mysql){
 		this.mysql = mysql;
 		orvosTomb = new ArrayList<RendeloOrvos>();
 		szobaTomb = new ArrayList<RendeloSzoba>();
 		idopontTomb = new ArrayList<RendeloIdopont>();
+	}
+
+	
+	public void downloadOrvos(){
+		String sql="SELECT * FROM rendelo_orvos";
 		try {
-			downloadFirstTime();
+			mysql.exec(sql);
+			while (mysql.getResult().next()==true){
+				orvosTomb.add(new RendeloOrvos(mysql.getResult().getInt("id"), mysql.getResult().getString("nev")));
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void downloadSzoba(){
+		String sql="SELECT * FROM rendelo_szoba";
+		try {			
+			mysql.exec(sql);
+			while (mysql.getResult().next()==true){
+				szobaTomb.add(new RendeloSzoba(mysql.getResult().getInt("id"), mysql.getResult().getString("nev")));
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void downloadIdopont(){
+		String sql="SELECT * FROM rendelo_idopont";
+		try {			
+			mysql.exec(sql);
+			while (mysql.getResult().next()==true){
+				 DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");			
+				 
+				 Date tol = format.parse(mysql.getResult().getString("tol"));
+				 Date ig = format.parse(mysql.getResult().getString("ig"));
+				 
+				 idopontTomb.add(
+						new RendeloIdopont(
+								mysql.getResult().getInt("id"),
+								tol, 
+								ig, 
+								mysql.getResult().getInt("szobaId"),
+								mysql.getResult().getInt("orvosId"), 
+								mysql.getResult().getString("alkalomTipus")
+						)		
+				);
+								
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-
-	public void downloadFirstTime() throws SQLException, ParseException{
-		String sql="SELECT * FROM rendelo_orvos";
-		mysql.exec(sql);
-		while (mysql.getResult().next()==true){
-			orvosTomb.add(new RendeloOrvos(mysql.getResult().getInt("id"), mysql.getResult().getString("nev")));
+	
+	public void insert(String cmd, String nev){
+		try {
+			if (cmd.equals("orvos")){
+				String sql = "INSERT INTO rendelo_orvos SET nev = '"+nev+"'";
+				mysql.exec(sql);
+				String sql2 = "SELECT id FROM rendelo_orvos WHERE nev = '"+nev+"'";
+				mysql.exec(sql2);
+				int id = 0;
+				while (mysql.getResult().next()){
+					id = mysql.getResult().getInt("id");
+				}
+				if (id>0){
+					orvosTomb.add(new RendeloOrvos(id, nev));
+				} else {
+					throw new SQLException("Not inserted");
+				}
+			} else if (cmd.equals("szoba")){
+				String sql = "INSERT INTO rendelo_szoba SET nev = '"+nev+"'";
+				mysql.exec(sql);
+				String sql2 = "SELECT id FROM rendelo_szoba WHERE nev = '"+nev+"'";
+				mysql.exec(sql2);
+				int id = 0;
+				while (mysql.getResult().next()){
+					id = mysql.getResult().getInt("id");
+				}
+				if (id>0){
+					szobaTomb.add(new RendeloSzoba(id, nev));
+				} else {
+					throw new SQLException("Not inserted");
+				}
+			}
+		} catch (SQLException e){
+			//TODO
+			e.printStackTrace();
 		}
 		
-		sql="SELECT * FROM rendelo_szoba";
-		mysql.exec(sql);
-		while (mysql.getResult().next()==true){
-			szobaTomb.add(new RendeloSzoba(mysql.getResult().getInt("id"), mysql.getResult().getString("nev")));
-		}
-		
-		sql="SELECT * FROM rendelo_idopont";
-		mysql.exec(sql);
-		while (mysql.getResult().next()==true){
-			 DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");			
-			 
-			 Date tol = format.parse(mysql.getResult().getString("tol"));
-			 Date ig = format.parse(mysql.getResult().getString("ig"));
-			 
-			 idopontTomb.add(
-					new RendeloIdopont(
-							mysql.getResult().getInt("id"),
-							tol, 
-							ig, 
-							mysql.getResult().getInt("szobaId"),
-							mysql.getResult().getInt("orvosId"), 
-							mysql.getResult().getString("alkalomTipus")
-					)		
-			);
-							
-		}
 	}
 	
-	public void insert(String cmd, String nev) throws SQLException{
-		if (cmd.equals("orvos")){
-			String sql = "INSERT INTO rendelo_orvos SET nev = '"+nev+"'";
+	public void addNewSchedule(Date tol, Date ig,  int szobaId,	 int orvosId, String alkalomTipus){
+		try {
+			DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			System.out.println(formatter.format(tol));
+			System.out.println(formatter.format(ig));
+			String sql = "INSERT INTO rendelo_idopont SET tol = '"+formatter.format(tol).toString()+"', ig = '"+formatter.format(ig).toString()+"', szobaId = '"+szobaId+"', orvosId = '"+orvosId+"', alkalomTipus = '"+alkalomTipus+"'";
+			System.out.println(sql);
 			mysql.exec(sql);
-			String sql2 = "SELECT id FROM rendelo_orvos WHERE nev = '"+nev+"'";
+			String sql2 = "SELECT id FROM rendelo_idopont WHERE tol = '"+formatter.format(tol).toString()+"' AND ig = '"+formatter.format(ig).toString()+"' AND szobaId = '"+szobaId+"' AND orvosId = '"+orvosId+"' AND alkalomTipus = '"+alkalomTipus+"'";
 			mysql.exec(sql2);
 			int id = 0;
 			while (mysql.getResult().next()){
 				id = mysql.getResult().getInt("id");
 			}
 			if (id>0){
-				orvosTomb.add(new RendeloOrvos(id, nev));
+				RendeloIdopont r = new RendeloIdopont(id, tol, ig, szobaId, orvosId, alkalomTipus);
+				System.out.println(r);
+				idopontTomb.add(r);
 			} else {
 				throw new SQLException("Not inserted");
 			}
-		} else if (cmd.equals("szoba")){
-			String sql = "INSERT INTO rendelo_szoba SET nev = '"+nev+"'";
-			mysql.exec(sql);
-			String sql2 = "SELECT id FROM rendelo_szoba WHERE nev = '"+nev+"'";
-			mysql.exec(sql2);
-			int id = 0;
-			while (mysql.getResult().next()){
-				id = mysql.getResult().getInt("id");
-			}
-			if (id>0){
-				szobaTomb.add(new RendeloSzoba(id, nev));
-			} else {
-				throw new SQLException("Not inserted");
-			}
-		}
-	}
-	
-	public void addNewSchedule(Date tol, Date ig,  int szobaId,	 int orvosId, String alkalomTipus) throws SQLException, ParseException{
-		DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		System.out.println(formatter.format(tol));
-		System.out.println(formatter.format(ig));
-		String sql = "INSERT INTO rendelo_idopont SET tol = '"+formatter.format(tol).toString()+"', ig = '"+formatter.format(ig).toString()+"', szobaId = '"+szobaId+"', orvosId = '"+orvosId+"', alkalomTipus = '"+alkalomTipus+"'";
-		System.out.println(sql);
-		mysql.exec(sql);
-		String sql2 = "SELECT id FROM rendelo_idopont WHERE tol = '"+formatter.format(tol).toString()+"' AND ig = '"+formatter.format(ig).toString()+"' AND szobaId = '"+szobaId+"' AND orvosId = '"+orvosId+"' AND alkalomTipus = '"+alkalomTipus+"'";
-		mysql.exec(sql2);
-		int id = 0;
-		while (mysql.getResult().next()){
-			id = mysql.getResult().getInt("id");
-		}
-		if (id>0){
-			RendeloIdopont r = new RendeloIdopont(id, tol, ig, szobaId, orvosId, alkalomTipus);
-			System.out.println(r);
-			idopontTomb.add(r);
-		} else {
-			throw new SQLException("Not inserted");
-		}
-	}
-	
-	
-	public void edit(String cmd, String oldName, String newName) throws SQLException{
-		int id = 0;
-		if (cmd.equals("orvos")){
-			RendeloOrvos o = null;
-			Iterator<RendeloOrvos> it = orvosTomb.iterator();
-			while (it.hasNext()){
-				o = it.next();
-				if (o.getNev().equals(oldName)){
-					id = o.getId();
-					o.setNev(newName);
-					break;
-				}
-			}
-			if (id>0){
-				String selectSql = "SELECT * FROM rendelo_orvos WHERE id='"+id+"'";
-				mysql.exec(selectSql);
-				int count = 0;
-				while (mysql.getResult().next()){
-					count++;
-				}
-				if (count==0){
-					orvosTomb.remove(o);
-					throw new SQLException("Not Found");
-				}
-				String sql = "UPDATE rendelo_orvos SET nev='"+newName+"' WHERE id='"+id+"'";
-				mysql.exec(sql);				
-			} else {
-				throw new SQLException("Not Found");
-			}
-		} else if (cmd.equals("szoba")){
-			RendeloSzoba o = null;
-			Iterator<RendeloSzoba> it = szobaTomb.iterator();
-			while (it.hasNext()){
-				o = it.next();
-				if (o.getNev().equals(oldName)){
-					id = o.getId();
-					o.setNev(newName);
-					break;
-				}
-			}
-			if (id>0){
-				String selectSql = "SELECT * FROM rendelo_szoba WHERE id='"+id+"'";
-				mysql.exec(selectSql);
-				int count = 0;
-				while (mysql.getResult().next()){
-					count++;
-				}
-				if (count==0){
-					szobaTomb.remove(o);
-					throw new SQLException("Not Found");
-				}
-				String sql = "UPDATE rendelo_szoba SET nev='"+newName+"' WHERE id='"+id+"'";
-				mysql.exec(sql);				
-			} else {
-				throw new SQLException("Not Found");
-			}
-			
+		} catch (SQLException e) {
+			// TODO: handle exception
 		}
 		
 	}
 	
-	public void delete(String cmd, String nev) throws SQLException{
-		int id = 0;
-		if (cmd.equals("orvos")){
-			RendeloOrvos o = null;
-			Iterator<RendeloOrvos> it = orvosTomb.iterator();
-			while (it.hasNext()){
-				o = it.next();
-				if (o.getNev().equals(nev)){
-					id = o.getId();
-					break;
+	
+	public void edit(String cmd, String oldName, String newName){
+		try {
+			int id = 0;
+			if (cmd.equals("orvos")){
+				RendeloOrvos o = null;
+				Iterator<RendeloOrvos> it = orvosTomb.iterator();
+				while (it.hasNext()){
+					o = it.next();
+					if (o.getNev().equals(oldName)){
+						id = o.getId();
+						o.setNev(newName);
+						break;
+					}
 				}
-			}
-			if (id>0){
-				String selectSql = "SELECT * FROM rendelo_orvos WHERE id='"+id+"'";
-				mysql.exec(selectSql);
-				int count = 0;
-				while (mysql.getResult().next()){
-					count++;
-				}
-				if (count==0){
-					orvosTomb.remove(o);
+				if (id>0){
+					String selectSql = "SELECT * FROM rendelo_orvos WHERE id='"+id+"'";
+					mysql.exec(selectSql);
+					int count = 0;
+					while (mysql.getResult().next()){
+						count++;
+					}
+					if (count==0){
+						orvosTomb.remove(o);
+						throw new SQLException("Not Found");
+					}
+					String sql = "UPDATE rendelo_orvos SET nev='"+newName+"' WHERE id='"+id+"'";
+					mysql.exec(sql);				
+				} else {
 					throw new SQLException("Not Found");
 				}
-				String sql = "DELETE FROM rendelo_orvos WHERE id='"+id+"'";
-				mysql.exec(sql);		
-				orvosTomb.remove(o);
-			} else {
-				throw new SQLException("Not Found");
-			}
-		} else if (cmd.equals("szoba")){
-			RendeloSzoba o = null;
-			Iterator<RendeloSzoba> it = szobaTomb.iterator();
-			while (it.hasNext()){
-				o = it.next();
-				if (o.getNev().equals(nev)){
-					id = o.getId();
-					break;
+			} else if (cmd.equals("szoba")){
+				RendeloSzoba o = null;
+				Iterator<RendeloSzoba> it = szobaTomb.iterator();
+				while (it.hasNext()){
+					o = it.next();
+					if (o.getNev().equals(oldName)){
+						id = o.getId();
+						o.setNev(newName);
+						break;
+					}
 				}
-			}
-			if (id>0){
-				String selectSql = "SELECT * FROM rendelo_szoba WHERE id='"+id+"'";
-				mysql.exec(selectSql);
-				int count = 0;
-				while (mysql.getResult().next()){
-					count++;
-				}
-				if (count==0){
-					szobaTomb.remove(o);
+				if (id>0){
+					String selectSql = "SELECT * FROM rendelo_szoba WHERE id='"+id+"'";
+					mysql.exec(selectSql);
+					int count = 0;
+					while (mysql.getResult().next()){
+						count++;
+					}
+					if (count==0){
+						szobaTomb.remove(o);
+						throw new SQLException("Not Found");
+					}
+					String sql = "UPDATE rendelo_szoba SET nev='"+newName+"' WHERE id='"+id+"'";
+					mysql.exec(sql);				
+				} else {
 					throw new SQLException("Not Found");
 				}
-				String sql = "DELETE FROM rendelo_szoba WHERE id='"+id+"'";
-				mysql.exec(sql);	
-				szobaTomb.remove(o);
-			} else {
-				throw new SQLException("Not Found");
+				
 			}
 			
+		} catch (SQLException e) {
+			// TODO: handle exception
 		}
+		
+	}
+	
+	public void delete(String cmd, String nev){
+		try {
+			int id = 0;
+			if (cmd.equals("orvos")){
+				RendeloOrvos o = null;
+				Iterator<RendeloOrvos> it = orvosTomb.iterator();
+				while (it.hasNext()){
+					o = it.next();
+					if (o.getNev().equals(nev)){
+						id = o.getId();
+						break;
+					}
+				}
+				if (id>0){
+					String selectSql = "SELECT * FROM rendelo_orvos WHERE id='"+id+"'";
+					mysql.exec(selectSql);
+					int count = 0;
+					while (mysql.getResult().next()){
+						count++;
+					}
+					if (count==0){
+						orvosTomb.remove(o);
+						throw new SQLException("Not Found");
+					}
+					String sql = "DELETE FROM rendelo_orvos WHERE id='"+id+"'";
+					mysql.exec(sql);		
+					orvosTomb.remove(o);
+				} else {
+					throw new SQLException("Not Found");
+				}
+			} else if (cmd.equals("szoba")){
+				RendeloSzoba o = null;
+				Iterator<RendeloSzoba> it = szobaTomb.iterator();
+				while (it.hasNext()){
+					o = it.next();
+					if (o.getNev().equals(nev)){
+						id = o.getId();
+						break;
+					}
+				}
+				if (id>0){
+					String selectSql = "SELECT * FROM rendelo_szoba WHERE id='"+id+"'";
+					mysql.exec(selectSql);
+					int count = 0;
+					while (mysql.getResult().next()){
+						count++;
+					}
+					if (count==0){
+						szobaTomb.remove(o);
+						throw new SQLException("Not Found");
+					}
+					String sql = "DELETE FROM rendelo_szoba WHERE id='"+id+"'";
+					mysql.exec(sql);	
+					szobaTomb.remove(o);
+				} else {
+					throw new SQLException("Not Found");
+				}
+				
+			}
+		} catch (SQLException e) {
+			// TODO: handle exception
+		}
+		
 	}
 	
 	public ArrayList<RendeloOrvos> getOrvosTomb(){
