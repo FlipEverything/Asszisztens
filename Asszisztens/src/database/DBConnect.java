@@ -1,5 +1,6 @@
 package database;
 
+import java.awt.Color;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -7,6 +8,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JProgressBar;
 
 import GUI.BaseWindow;
 
@@ -14,60 +17,78 @@ public class DBConnect {
 	
 	private Connection conn;
 	private boolean connectionStatus;	
-	private String activeServer = "";
-	private String activeDatabase = "";
+	private String activeServer;
+	private String activeDatabase;
 	private Statement s;
 	private ResultSet result;
-	private int workingConn = -1;
+	private int workingConn;
 	private DatabaseMirrors acc;
 	
+	private JLabel pLabel;
+	private JProgressBar pBar;
+	
 	public DBConnect(){
-		connectionStatus = connectToDatabase();
-		if (connectionStatus == false){
-			Object[] o = {"Igen","Nem"};
-			boolean ask = BaseWindow.ask(o, "Sikertelen kapcsolatlétrehozás", "Elindítsam offline módban?", new JFrame());
-			if (ask == false){
-				System.exit(0);
-			}
-		} else {
-			try {
-				setS(conn.createStatement());
-			} catch (SQLException e) {
-				BaseWindow.makeWarning("Nem tudok kapcsolatot létrehozni!", e, "error", new JFrame());
-			}
-		}
+		
+		pBar = null;
+		pLabel = null;
+		conn = null;
+		connectionStatus = false;
+		activeServer = "";
+		activeDatabase = "";
+		s = null;
+		result = null;
+		setWorkingConn(-1);
+		acc = new DatabaseMirrors();
+		
 	}
 	
-	public boolean connectToDatabase(){
-		acc = new DatabaseMirrors();
-		if (acc.getCounter()==-1){
-			return false;
-		} else {
-			for (int i=0; i<=acc.getCounter(); i++){
-				try {
-				    open(acc, i);
-				    workingConn=i;
-				    return true;
-				} catch (SQLException ex) {
-					//BaseWindow.makeWarning("Nem tudok kapcsolódni a szerverhez!", ex, "error", new JFrame());
-					if (i!=acc.getCounter()){
-						Object[] o = {"Igen", "Nem"};
-						boolean b = BaseWindow.ask(o, "Nem sikerült a kapcsolatot felépíteni", "Megpróbál kapcsolatot létesíteni a tükörszerverrel?", new JFrame());
-						if (b == false){
-							System.exit(0);
+	public void startTheConnection(){	
+		pLabel.setForeground(Color.BLACK);
+		pLabel.setText("(OFFLINE) Kapcsolodas...");
+		class ConnectToDatabaseThread extends Thread{
+			public void run(){						
+				if (acc.getCounter()==-1){
+					pLabel.setForeground(Color.RED);
+					pLabel.setText("(OFFLINE) Hiba: Adatbazis konfiguracios fajl hianyzik vagy ures. ");
+					pBar.setIndeterminate(false);
+				} else {
+					for (int i=0; i<=acc.getCounter(); i++){
+						pLabel.setForeground(Color.BLACK);
+						pLabel.setText("(OFFLINE) Kapcsolodas ide..."+acc.getMirror(i).getUrl()+" ");
+						try {
+						    open(acc, i);
+						    setWorkingConn(i);
+						    connectionStatus=true;
+						    pLabel.setText("(ONLINE) Kapcsolodva: "+acc.getMirror(i).getDatabase()+"@"+acc.getMirror(i).getUrl()+" ");
+						    pBar.setIndeterminate(false);
+						    pBar.setValue(pBar.getMaximum());
+						    break;
+						} catch (SQLException ex) {
+							
 						}
-					}					
+					}
+					if (connectionStatus==false){
+						pLabel.setForeground(Color.RED);
+						pLabel.setText("(OFFLINE) Nem sikerult kapcsolodni... ");
+						pBar.setIndeterminate(false);
+					}
 				}
+				
 			}
 		}
-		return false;
+		
+		acc = new DatabaseMirrors();
+		ConnectToDatabaseThread connection = new ConnectToDatabaseThread();
+		connection.start();	
 	}
+	
 
 	public void exec(String sql) throws SQLException{
-		open(acc,workingConn);
-		setS(conn.createStatement());
-		s.execute(sql);
-		setResult(s.getResultSet());
+			setS(conn.createStatement());
+			s.execute(sql);
+			setResult(s.getResultSet());
+		
+		
 	}
 	
 	public void open(DatabaseMirrors acc, int i) throws SQLException{
@@ -133,5 +154,30 @@ public class DBConnect {
 
 	public ResultSet getResult() {
 		return result;
+	}
+	
+
+	public JProgressBar getpBar() {
+		return pBar;
+	}
+
+	public void setpBar(JProgressBar pBar) {
+		this.pBar = pBar;
+	}
+
+	public JLabel getpLabel() {
+		return pLabel;
+	}
+
+	public void setpLabel(JLabel pLabel) {
+		this.pLabel = pLabel;
+	}
+
+	public int getWorkingConn() {
+		return workingConn;
+	}
+
+	public void setWorkingConn(int workingConn) {
+		this.workingConn = workingConn;
 	}
 }

@@ -30,6 +30,7 @@ import rekord.RendeloOrvos;
 import rekord.RendeloSzoba;
 import tools.Const;
 
+import database.DBConnect;
 import database.DoctorScheduleDatabase;
 
 public class DoctorScheduleWindow extends BaseWindow{
@@ -51,7 +52,7 @@ public class DoctorScheduleWindow extends BaseWindow{
 	
 	private JPanel colors;
 	
-	public DoctorScheduleWindow(){
+	public DoctorScheduleWindow(DBConnect mysql){
 		super(0, 0, true, false, "Rendelő beosztás - Orvosok", 0, 0, JFrame.DISPOSE_ON_CLOSE, false);
 		
 		newJMenu("Fájl", "");
@@ -64,7 +65,7 @@ public class DoctorScheduleWindow extends BaseWindow{
 		setMenu();
 		
 		try {
-			dsObject = new DoctorScheduleDatabase();
+			dsObject = new DoctorScheduleDatabase(mysql);
 		} catch (SQLException e) {
 			makeWarning("SQL Hiba!", e, "error", this);
 		}

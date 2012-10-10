@@ -21,8 +21,8 @@ public class DoctorScheduleDatabase {
 	private ArrayList<RendeloSzoba> szobaTomb;
 	private ArrayList<RendeloIdopont> idopontTomb;
 	
-	public DoctorScheduleDatabase() throws SQLException{
-		mysql = new DBConnect();
+	public DoctorScheduleDatabase(DBConnect mysql) throws SQLException{
+		this.mysql = mysql;
 		orvosTomb = new ArrayList<RendeloOrvos>();
 		szobaTomb = new ArrayList<RendeloSzoba>();
 		idopontTomb = new ArrayList<RendeloIdopont>();

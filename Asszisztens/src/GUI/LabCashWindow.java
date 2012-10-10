@@ -30,6 +30,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import database.DBConnect;
 import database.LabCash;
 import rekord.Labor;
 
@@ -78,10 +79,13 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 	private int fizetendo;
 	private boolean firstDownload = true;
 	
-	public LabCashWindow(){
+	public LabCashWindow(DBConnect mysql){
 		super(preferredWidth, preferredHeight, resizable, visible, title, locationX, locationY, defaultCloseOperation, exit);
 		height = getHeight();
 		width = getWidth();
+		
+		labCash = new LabCash(mysql);
+		
 		newJMenu("Fájl", "Alap menü");
 			newJMenuItem("reLoad", "Adatok újraletöltése", "", true);
 		setMenu();
@@ -102,7 +106,6 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 		kasszaVegosszeg = new JLabel();
 		loadingBar = new JPanel();
 		pb = new JProgressBar();
-		labCash = new LabCash();
 	}
 	
 	public void deleteComponents(){

@@ -25,6 +25,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JSplitPane;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
@@ -64,14 +65,15 @@ public class MainWindow implements ActionListener{
 	private String status;
 	private String serverDetails;
 	private User admin;
-	private DBConnect mysql;
+	private static DBConnect mysql;
 	private DatabaseModify command;
 	private JLabel loginData;
 	
-	private LabCashWindow labCashWindow;
-	private DoctorScheduleWindow doctorScheduleWindow;
+	private static LabCashWindow labCashWindow;
+	private static DoctorScheduleWindow doctorScheduleWindow;
 	private CentrumLab c;
 	private JPanel mainMessagePanel;
+	private JProgressBar connectionProgress;
 	
 	public MainWindow(){
 		
@@ -163,8 +165,21 @@ public class MainWindow implements ActionListener{
 		JSplitPane mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,mainCenterPanel,mainMessagePanel);
 		
 		window.add(mainSplit,"Center");
-		statusLabel.setBorder(BorderFactory.createLoweredBevelBorder());
-		window.add(statusLabel,"South");
+		
+		statusLabel.setBorder(BorderFactory.createEmptyBorder(3, 8, 3, 3));
+		statusLabel.setPreferredSize(new Dimension(window.getWidth()/3*2,15));
+		statusLabel.setSize(new Dimension(window.getWidth()/3*2,15));
+		
+		JPanel status = new JPanel();
+		status.setLayout(new BoxLayout(status, BoxLayout.LINE_AXIS));
+		
+		status.setPreferredSize(new Dimension(window.getWidth(),15));
+		status.setSize(new Dimension(window.getWidth()/3,15));
+		
+		status.add(statusLabel);
+		status.add(connectionProgress);
+		
+		window.add(status,"South");
 	    if (fullScreen){
 	    	window.setExtendedState(JFrame.MAXIMIZED_BOTH);
 	    }
@@ -172,7 +187,17 @@ public class MainWindow implements ActionListener{
 	
 	
 	public void initComponents() throws SQLException{
-		connect();
+		connectionProgress = new JProgressBar();
+		connectionProgress.setIndeterminate(true);
+		statusLabel = new JLabel();
+		
+		mysql = new DBConnect();
+		mysql.setpBar(connectionProgress);
+		mysql.setpLabel(statusLabel);
+		mysql.startTheConnection();
+		
+		downloadDatas();
+		
 		window = new JFrame();
 		mainCenterPanel = new JPanel();
 		mainMessagePanel = new JPanel();
@@ -180,21 +205,25 @@ public class MainWindow implements ActionListener{
 		admin = new User(mysql);
 		menuBar = new JMenuBar();
 		menu = new JMenu();
-		statusLabel = new JLabel(getDatabaseStatus());
 		c = new CentrumLab();
-		
-		downloadDatas();
+	
 	}
 	
-	public void downloadDatas(){
+	public static void downloadDatas(){
 		class T extends Thread {
+			boolean downloaded = false;
 	         public void run() {
-	        	if (mysql.isConnectionStatus()){
-	        		if (labCashWindow==null) labCashWindow = new LabCashWindow();
-					if (doctorScheduleWindow==null) doctorScheduleWindow = new DoctorScheduleWindow();	
+	        	while (!downloaded){
+	        		if (mysql.isConnectionStatus()){
+	        			downloaded = true;
+	        			System.out.println(mysql.isConnectionStatus());
+		        		if (labCashWindow==null) labCashWindow = new LabCashWindow(mysql);
+						if (doctorScheduleWindow==null) doctorScheduleWindow = new DoctorScheduleWindow(mysql);	
+		        	}
 	        	}
-	        		        		
-	         }
+	        		
+	        	}	        		        		
+	         
 		}
 		T t = new T();
 		t.start();
@@ -332,11 +361,18 @@ public class MainWindow implements ActionListener{
 			} else if (cmd=="help"){
 				help();
 			} else if (cmd=="penztar"){
-				labCashWindow.setVisible(true);
-				if (labCashWindow.isFirstDownload()){
-					labCashWindow.startTransaction();
-					labCashWindow.setFirstDownload(false);
+				if (labCashWindow==null) 
+					BaseWindow.makeWarning("Még folyik az adatletöltés", new Exception(), "success", new JFrame());
+				else {
+					labCashWindow.setVisible(true);
+					
+					if (labCashWindow.isFirstDownload()){
+						labCashWindow.startTransaction();
+						labCashWindow.setFirstDownload(false);
+					}
 				}
+					
+				
 			} else if (cmd=="arfolyamFrissit"){
 				
 			} else if (cmd=="arfolyamBeallit"){

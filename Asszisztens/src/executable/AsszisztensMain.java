@@ -16,7 +16,7 @@ public class AsszisztensMain{
 	///
 	private static ServerSocket SERVER_SOCKET;
 	public MainWindow applicationWindow;
-	private static boolean DEBUG = false;
+	private static boolean DEBUG = true;
 	///
 	
 	public AsszisztensMain() throws SQLException{

@@ -10,8 +10,8 @@ public class LabCash {
 	private DBConnect mysql;
 	private ArrayList<Labor> laborLista;
 	
-	public LabCash(){
-		mysql = new DBConnect();
+	public LabCash(DBConnect mysql){
+		this. mysql = mysql;
 		laborLista = new ArrayList<Labor>();
 	}
 	
