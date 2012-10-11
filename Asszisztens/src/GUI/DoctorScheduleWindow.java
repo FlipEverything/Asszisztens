@@ -75,7 +75,7 @@ public class DoctorScheduleWindow extends BaseWindow{
 		dsObject.downloadOrvos();
 		dsObject.downloadSzoba();
 		
-init();
+		init();
 		
 		setLayout(new BorderLayout());
 		

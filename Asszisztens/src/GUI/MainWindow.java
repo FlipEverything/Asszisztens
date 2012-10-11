@@ -203,25 +203,19 @@ public class MainWindow implements ActionListener{
 	}
 	
 	public void downloadDatas(){
-		class T extends Thread {
-			
-			boolean downloaded = false;
-			
-	         public void run() {
-	        	while (!downloaded){
-	        		
+		
+		class DownloadFirstTime extends Thread {			
+	         public void run() {	        	 
+	        	while (!labCashWindow.isFirstDownload() || !doctorScheduleWindow.isFirstDownload()){	        		
 	        		if (mysql.isConnectionStatus()){	        			
-	        			labCashWindow.startTransaction();
-	        			doctorScheduleWindow.startTransaction();
-	        			downloaded = true;
-		        	}
-	        		
-	        	}
-	        		
-	        	}	        		        		
-	         
+	        			if (!labCashWindow.isFirstDownload()) labCashWindow.startTransaction();
+	        			if (!doctorScheduleWindow.isFirstDownload()) doctorScheduleWindow.startTransaction();
+		        	} 		
+	        	}	        		
+	        }	        		        	 
 		}
-		T t = new T();
+		
+		DownloadFirstTime t = new DownloadFirstTime();
 		t.start();
 	}
 	
