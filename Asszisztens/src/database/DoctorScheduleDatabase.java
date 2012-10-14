@@ -29,33 +29,24 @@ public class DoctorScheduleDatabase {
 	}
 
 	
-	public void downloadOrvos(){
+	public void downloadOrvos() throws SQLException{
 		String sql="SELECT * FROM rendelo_orvos";
-		try {
-			mysql.exec(sql);
-			while (mysql.getResult().next()==true){
-				orvosTomb.add(new RendeloOrvos(mysql.getResult().getInt("id"), mysql.getResult().getString("nev")));
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		mysql.exec(sql);
+		while (mysql.getResult().next()==true){
+			orvosTomb.add(new RendeloOrvos(mysql.getResult().getInt("id"), mysql.getResult().getString("nev")));
 		}
 	}
 	
-	public void downloadSzoba(){
-		String sql="SELECT * FROM rendelo_szoba";
-		try {			
-			mysql.exec(sql);
-			while (mysql.getResult().next()==true){
-				szobaTomb.add(new RendeloSzoba(mysql.getResult().getInt("id"), mysql.getResult().getString("nev")));
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	public void downloadSzoba() throws SQLException{
+		String sql="SELECT * FROM rendelo_szoba";			
+		mysql.exec(sql);
+		while (mysql.getResult().next()==true){
+			szobaTomb.add(new RendeloSzoba(mysql.getResult().getInt("id"), mysql.getResult().getString("nev")));
 		}
+
 	}
 	
-	public void downloadIdopont(){
+	public void downloadIdopont() throws SQLException{
 		String sql="SELECT * FROM rendelo_idopont";
 		try {			
 			mysql.exec(sql);
@@ -77,9 +68,6 @@ public class DoctorScheduleDatabase {
 				);
 								
 			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

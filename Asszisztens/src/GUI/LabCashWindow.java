@@ -306,15 +306,8 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 		}
 		String cmd = e.getActionCommand();
 		if (cmd.equals("reLoad")){
-			remove(felsoScroll);
-			remove(lista);
-			remove(keresoPanel);
-			remove(also);
-			refresh();
-			deleteComponents();
-			createWindowContent();
-			refresh();
 			startTransaction();
+			refresh();
 		}
 	}
 

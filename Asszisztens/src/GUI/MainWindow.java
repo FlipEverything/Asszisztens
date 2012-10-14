@@ -207,7 +207,7 @@ public class MainWindow implements ActionListener{
 		class DownloadFirstTime extends Thread {			
 	         public void run() {	        	 
 	        	while (!labCashWindow.isFirstDownload() || !doctorScheduleWindow.isFirstDownload()){	        		
-	        		if (mysql.isConnectionStatus()){	        			
+	        		if (mysql.isConnection()){	        			
 	        			if (!labCashWindow.isFirstDownload()) labCashWindow.startTransaction();
 	        			if (!doctorScheduleWindow.isFirstDownload()) doctorScheduleWindow.startTransaction();
 		        	} 		
@@ -286,7 +286,7 @@ public class MainWindow implements ActionListener{
 				cmd.equals("arfolyamLekerdezes") ||
 				cmd.equals("rendeloBeosztas")
 			){
-				if (mysql.isConnectionStatus()==false){
+				if (mysql.isConnection()==false){
 					BaseWindow.makeWarning("Offline módban ez a funkció nem elérhető!", new Exception(), "success", new JFrame());
 				} else {
 					runAnotherCommand = true;
