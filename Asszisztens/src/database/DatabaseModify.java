@@ -328,17 +328,18 @@ public class DatabaseModify implements ActionListener{
 			sql+="alapdij='"+alapdij.getSelectedItem()+"', allapot='"+allapot.getSelectedItem()+"', csoport='"+csoport.getSelectedIndex()+"' WHERE id='"+actEdit+"';";
 			try {
 				mysql.exec(sql);
+				editSingleRecord.setVisible(false);
+				try {
+					downloadList();
+				} catch (SQLException e) {
+					BaseWindow.makeWarning("SQL parancsfuttatási hiba!", e, "error", new JFrame());
+				}
+				refresh();
 			} catch (SQLException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
-			}
-			editSingleRecord.setVisible(false);
-			try {
-				downloadList();
-			} catch (SQLException e) {
-				BaseWindow.makeWarning("SQL parancsfuttatási hiba!", e, "error", new JFrame());
-			}
-			refresh();
+				BaseWindow.makeWarning("Ki kell tölteni minden mezőt! SQL Hiba!", e1, "error", new JFrame());
+			}	
 		} else if (cmd.equals("new")){
 			String sql = "INSERT INTO labor SET ";
 			for (int i=0; i<arr.length; i++){
@@ -347,12 +348,15 @@ public class DatabaseModify implements ActionListener{
 			sql+="alapdij='"+alapdij.getSelectedItem()+"', csoport='"+csoport.getSelectedIndex()+"';";
 			try {
 				mysql.exec(sql);
+				editSingleRecord.setVisible(false);
+				refresh();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				BaseWindow.makeWarning("Ki kell tölteni minden mezőt! SQL Hiba!", e, "error", new JFrame());
+				
 			}
-			editSingleRecord.setVisible(false);
-			refresh();
+			
 		}
 		
 	}
