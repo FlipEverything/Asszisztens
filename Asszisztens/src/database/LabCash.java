@@ -1,70 +1,65 @@
 package database;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.Iterator;
 
-import rekord.Labor;
+import GUI.BaseWindow;
+
+import com.mysql.jdbc.Statement;
+
+import rekord.Csoport;
+
 
 public class LabCash {
-	private DBConnect mysql;
-	private ArrayList<Labor> laborLista;
 	
-	public LabCash(DBConnect mysql){
-		this.mysql = mysql;
-		laborLista = new ArrayList<Labor>();
-	}
-	
-	public int downloadAlapdij() throws SQLException{
-		int fizetendo;
-		mysql.exec("SELECT SUM(aranyklinika_ar) as alapdij FROM labor WHERE alapdij='igen';");
-		mysql.getResult().next();
+	public static void insertCategory(DAO dao, Csoport cs){
 		try {
-			fizetendo = Integer.parseInt(mysql.getResult().getString("alapdij"));
-		} catch (NumberFormatException e){
-			fizetendo = 0;
+			int id = dao.getMysql().getS().executeUpdate("INSERT INTO csoport SET nev='"+cs.getNev()+"'", Statement.RETURN_GENERATED_KEYS);
+			dao.getLaborCsoport().add(new Csoport(id, cs.getNev()));
+		} catch (SQLException e) {
+			BaseWindow.makeWarning("Nem tudtam a csoportot beszúrni!", e, "error");
 		}
-		return fizetendo;
 	}
 	
-	public ArrayList<Labor> downloadResult() throws SQLException{
-		String sql = "SELECT * FROM labor WHERE allapot='aktiv' ORDER BY csoport;";
-		mysql.exec(sql);
-		/*ResultSetMetaData metaData = mysql.getResult().getMetaData();
-        int rowCount = metaData.getColumnCount();
-        for (int i = 0; i < rowCount; i++) {
-            System.out.print(metaData.getColumnName(i + 1) + "  \t");
-            System.out.println(metaData.getColumnTypeName(i + 1));
-        }*/
-		while (mysql.getResult().next()==true){
-			laborLista.add(
-					new Labor(
-						Integer.parseInt(mysql.getResult().getString("id")),
-						mysql.getResult().getString("nev1"), 
-						mysql.getResult().getString("nev2"),
-						mysql.getResult().getString("megj"),
-						mysql.getResult().getString("ido"), 
-						Integer.parseInt(mysql.getResult().getString("labor_ar")),
-						Integer.parseInt(mysql.getResult().getString("partner_ar")),
-						Integer.parseInt(mysql.getResult().getString("aranyklinika_ar")),
-						mysql.getResult().getString("alapdij"),
-						Integer.parseInt(mysql.getResult().getString("csoport"))
-					)
-			);
+	public static void editCategory(DAO dao, Csoport cs){
+		try {
+			dao.getMysql().exec("UPDATE csoport SET nev = '"+cs.getNev()+"' WHERE id ='"+cs.getId()+"'");
+			Iterator<Csoport> it = dao.getLaborCsoport().iterator();
+			while (it.hasNext()){
+				Csoport a = it.next();
+				if (a.getId()==cs.getId()){
+					a.setNev(cs.getNev());
+					break;
+				}
+			}
+		} catch (SQLException e) {
+			BaseWindow.makeWarning("Nem tudtam a csoportot szerkeszteni!", e, "error");
 		}
-		return laborLista;
 	}
 	
-	public ArrayList<Labor> getLaborLista() {
-		return laborLista;
+	public static void deleteCategory(DAO dao, Csoport cs){
+		try {
+			dao.getMysql().exec("DELETE FROM csoport WHERE id ='"+cs.getId()+"'");
+			Iterator<Csoport> it = dao.getLaborCsoport().iterator();
+			while (it.hasNext()){
+				Csoport a = it.next();
+				if (a.getId()==cs.getId()){
+					dao.getLaborCsoport().remove(a);
+					break;
+				}
+			}
+		} catch (SQLException e) {
+			BaseWindow.makeWarning("Nem tudtam a csoportot törölni!", e, "error");
+		}
+	}
+	
+	public static void insertItem(){
+		
+	}
+	
+	public static void editItem(){
+		
 	}
 
-	public void setLaborLista(ArrayList<Labor> laborLista) {
-		this.laborLista = laborLista;
-	}
-
-	public ResultSet getItems(int id) throws SQLException{
-		mysql.exec("SELECT nev FROM csoport WHERE id='"+id+"'");
-		return mysql.getResult();
-	}
+	
 }

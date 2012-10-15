@@ -12,7 +12,6 @@ public class Const {
 	public static final int CALENDAR_END_HOUR = 21;
 	
 	public static final String PROJECT_PATH = Const.class.getProtectionDomain().getCodeSource().getLocation().getPath().replace("/bin", "");;
-
 	
 	public static String getDayOfTheWeek(int i) {
 		String day = null;

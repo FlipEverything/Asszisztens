@@ -4,17 +4,18 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
@@ -28,9 +29,10 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import database.DBConnect;
-import database.LabCash;
+import database.DAO;
+import rekord.Csoport;
 import rekord.Labor;
+import tools.Const;
 
 
 public class LabCashWindow extends BaseWindow implements ItemListener, ActionListener, DocumentListener {
@@ -67,56 +69,27 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 	private int listaWidth = 350;
 	private int alsoHeight = 100;
 	private int buttonHeight = 30;
-	private int searchHeight = 20;
+	private int searchHeight = 30;
 	private int componentWidth; //offset
 	
 	//Database connection
-	private LabCash labCash;
 	private int fizetendo;
-	private boolean firstDownload;
+	private DAO dao;
+	private JButton category;
+	private JButton newItem;
+	private JButton manageItem;
 	
-	public LabCashWindow(DBConnect mysql){
+	public LabCashWindow(DAO dao){
 		super(preferredWidth, preferredHeight, resizable, visible, title, locationX, locationY, defaultCloseOperation, exit);
+		setIconImage(Toolkit.getDefaultToolkit().getImage(Const.PROJECT_PATH+"icon_lab.png"));
 		height = getHeight();
 		width = getWidth();
 		
-		labCash = new LabCash(mysql);
+		this.dao = dao;
+		this.fizetendo = 0;	
 		
-		newJMenu("Fájl", "Alap menü");
-			newJMenuItem("reLoad", "Adatok újraletöltése", "", true);
-		setMenu();
 		createWindowContent();
 		
-		setFirstDownload(false);
-	}
-	
-	public void initComponents(){
-		deselectAll = new JButton("Összes kijelölés megszüntetése");
-		valasztott = new ArrayList<Labor>();
-		checkBoxLista = new ArrayList<JCheckBox>();
-		felso = new JPanel();
-		felsoScroll = new JScrollPane(felso);
-		also = new JPanel();
-		lista = new JPanel();
-		gombok = new JPanel();
-		kereses = new JTextField();
-		keresoPanel = new JPanel();
-		kasszaVegosszeg = new JLabel();
-	}
-	
-	public void deleteComponents(){
-		deselectAll = null;
-		valasztott = null;
-		checkBoxLista = null;
-		felso = null;
-		felsoScroll = null;
-		also = null;
-		lista = null;
-		gombok = null;
-		kereses = null;
-		keresoPanel = null;
-		kasszaVegosszeg = null;
-		labCash = null;
 	}
 	
 	public void createWindowContent(){
@@ -124,7 +97,18 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 		initComponents();
 		
 		componentWidth = (int)(width * 0.25);	
-		deselectAll.addActionListener(this);		
+		deselectAll.addActionListener(this);
+		deselectAll.setFocusable(false);
+		deselectAll.setEnabled(false);
+		
+		category.addActionListener(this);
+		category.setFocusable(false);
+		
+		newItem.addActionListener(this);
+		newItem.setFocusable(false);
+		
+		manageItem.addActionListener(this);
+		manageItem.setFocusable(false);
 		
 		felso.setLayout(new BoxLayout(felso, BoxLayout.PAGE_AXIS));
 		felso.setSize(new Dimension(width-listaWidth, height-alsoHeight));
@@ -147,7 +131,11 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 		gombok.setPreferredSize(new Dimension(width, buttonHeight));
 		gombok.setLayout(new BoxLayout(gombok, BoxLayout.X_AXIS));
 		gombok.add(deselectAll);
+		gombok.add(category);
+		gombok.add(newItem);
+		gombok.add(manageItem);
 			
+		kereses.setFont(new Font("SansSerif", Font.PLAIN, 20));
 		kereses.setPreferredSize(new Dimension(width, searchHeight));
 		kereses.getDocument().addDocumentListener(this);
 		
@@ -164,42 +152,72 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 		add(keresoPanel,"North");
 		add(also,"South");
 			
-		/////////////////////////////////////UPDATE///////////////////////////////
-		SwingUtilities.updateComponentTreeUI(this);
-		///////////////////////////////////UPDATE/////////////////////////////////
-	
-		this.setFizetendo(0);
+		refresh();
 	}
 	
-	public void startTransaction(){
-			
-			try {	
-				setFizetendo(labCash.downloadAlapdij());
-				
-				Iterator<Labor> rekordIt = labCash.downloadResult().iterator();
-				int elozo = 0;
-				while ( rekordIt.hasNext() ){
-			    	Labor j = rekordIt.next();
-			    	if (elozo!=j.getCsoport()){
-			    		ResultSet rs = labCash.getItems(j.getCsoport());
-			    		if (rs.next() == true ){
-			    			String labelText = "<html><table><tr style='background-color: #5AAD41; color: white;'><td style='width: "+(felsoScroll.getPreferredSize().width-componentWidth)+"px;'><b>"+rs.getString("nev")+"</b></td></tr></table></html>";
-			    			felso.add(new JLabel(labelText));				    			
-			    		}
-			    	}
-			    	rekordPaint(j);
-			    	elozo = j.getCsoport();
-			    }
-				
-				refreshWithNewDatas();
-			    refresh();
-			    
-			    setFirstDownload(true);
-			    
-			} catch (SQLException e) {
-				BaseWindow.makeWarning("SQL parancsfuttatási hiba!", e, "error", new JFrame());
-			}		
+	public void initComponents(){
+		deselectAll = new JButton("Összes kijelölés megszüntetése", new ImageIcon(Const.PROJECT_PATH+"icon_cancel.png"));
+		category = new JButton("Kategóriák kezelése", new ImageIcon(Const.PROJECT_PATH+"icon_category.png"));
+		newItem = new JButton("Új laborvizsgálat", new ImageIcon(Const.PROJECT_PATH+"icon_new.png"));
+		manageItem = new JButton("Laborvizsgálatok kezelése", new ImageIcon(Const.PROJECT_PATH+"icon_edit.png"));
+		valasztott = new ArrayList<Labor>();
+		checkBoxLista = new ArrayList<JCheckBox>();
+		felso = new JPanel();
+		felsoScroll = new JScrollPane(felso);
+		also = new JPanel();
+		lista = new JPanel();
+		gombok = new JPanel();
+		kereses = new JTextField();
+		keresoPanel = new JPanel();
+		kasszaVegosszeg = new JLabel();
+	}
+	
+	public int getAlapdij(){
+		int alapdij = 0;
 		
+	    Iterator<Labor> itAlapdij = dao.getLabor().iterator();
+	    while ( itAlapdij.hasNext() ){
+	    	Labor j = itAlapdij.next();
+	    	String nev = j.getNev1();
+	    	if (nev.length()>35){
+	    		nev = nev.substring(0,35)+"...";
+	    	}
+	    	if (j.getAlapdij().equals("igen")){
+	    		lista.add(new JLabel("<html><b>"+nev+"</b> ("+j.getAranyklinikaAr()+" HUF)</html>"));
+	    		alapdij += j.getAranyklinikaAr();
+	    	}
+	    }
+		
+		return alapdij;
+	}
+	
+	public void init(){
+		setFizetendo(getAlapdij());
+		refreshGUI();
+	}
+	
+	public void refreshGUI(){
+			lista.removeAll();
+			
+			getAlapdij();
+			
+			Iterator<Labor> rekordIt = dao.getLabor().iterator();
+			Iterator<Csoport> csoportIt = dao.getLaborCsoport().iterator();
+			int elozo = 0;
+			while ( rekordIt.hasNext() ){
+		    	Labor j = rekordIt.next();
+		    	if (elozo!=j.getCsoport()){
+		    		Csoport cs = csoportIt.next();
+		    		String labelText = "<html><table><tr style='background-color: #5AAD41; color: white;'><td style='width: "+(felsoScroll.getPreferredSize().width-componentWidth)+"px;'><b>"+cs.getNev()+"</b></td></tr></table></html>";
+		    		felso.add(new JLabel(labelText));				    			
+		    	}
+		    	if (j.getAllapot().equals("aktiv")){
+		    		rekordPaint(j);
+		    	}
+		    	elozo = j.getCsoport();
+			}
+		    
+		    refresh();
 	}
 	
 	public void rekordPaint(Labor j){
@@ -225,34 +243,26 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
     		checkBoxLista.add(ck);
     		felso.add(ck);
     	}
-	}	
+	}
+	
+	public void valasztottak(){
+		int i = 0;
+		 Iterator<Labor> it = valasztott.iterator(); 
+		    while ( it.hasNext() ){
+		    	Labor j = it.next();
+		    	String nev = j.getNev1();
+		    	if (nev.length()>35){
+		    		nev = nev.substring(0,35)+"...";
+		    	}
+		    	lista.add(new JLabel("<html><b>"+nev+"</b> ("+j.getAranyklinikaAr()+" HUF)</html>"));
+		    	i++;
+		    }
+		    
+		    if (i>0) deselectAll.setEnabled(true); else deselectAll.setEnabled(false); 
+	}
 	
 	public void beallitKasszaVegosszeg(int osszeg){
 		kasszaVegosszeg.setText("<html><div style='text-align: right;'><span style='font-size: 20px; font-weight: bold;'>Fizetendő:</span> <span style='font-size: 30px; font-weight: bold;'>"+osszeg+"&nbsp;HUF&nbsp;</span></div></html>");
-	}
-	
-	public void refreshWithNewDatas(){
-		lista.removeAll();
-	    Iterator<Labor> itAlapdij = labCash.getLaborLista().iterator();
-	    while ( itAlapdij.hasNext() ){
-	    	Labor j = itAlapdij.next();
-	    	String nev = j.getNev1();
-	    	if (nev.length()>35){
-	    		nev = nev.substring(0,35)+"...";
-	    	}
-	    	if (j.getAlapdij().equals("igen")){
-	    		lista.add(new JLabel("<html><b>"+nev+"</b> ("+j.getAranyklinikaAr()+" HUF)</html>"));
-	    	}
-	    }
-	    Iterator<Labor> it = valasztott.iterator(); 
-	    while ( it.hasNext() ){
-	    	Labor j = it.next();
-	    	String nev = j.getNev1();
-	    	if (nev.length()>35){
-	    		nev = nev.substring(0,35)+"...";
-	    	}
-	    	lista.add(new JLabel("<html><b>"+nev+"</b> ("+j.getAranyklinikaAr()+" HUF)</html>"));
-	    }
 	}
 
 	@Override
@@ -261,28 +271,28 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 		JCheckBox clickObject;
 		int i = 0;
 		while (it.hasNext()){
-			if (labCash.getLaborLista().get(i).getAlapdij().equals("igen")){
-				i++;
-			}
 				clickObject = it.next();
 				if (clickObject==arg0.getSource()){
 					if (clickObject.getSelectedObjects()==null){
-						setFizetendo(getFizetendo()-labCash.getLaborLista().get(i).getAranyklinikaAr());
-						valasztott.remove(labCash.getLaborLista().get(i));
+						setFizetendo(getFizetendo()-dao.getLabor().get(i).getAranyklinikaAr());
+						valasztott.remove(dao.getLabor().get(i));
 					}else{
-						setFizetendo(getFizetendo()+labCash.getLaborLista().get(i).getAranyklinikaAr());
-						valasztott.add(labCash.getLaborLista().get(i));
+						setFizetendo(getFizetendo()+dao.getLabor().get(i).getAranyklinikaAr());
+						valasztott.add(dao.getLabor().get(i));
 					}
 				}
 				i++;
 		}
-		refreshWithNewDatas();
-		repaint();
+		lista.removeAll();
+		getAlapdij();
+		valasztottak();
 		refresh();
 	}
 	
 	public void refresh(){
+		repaint();
 		SwingUtilities.updateComponentTreeUI(lista);
+		SwingUtilities.updateComponentTreeUI(this);
 	}
 
 	@Override
@@ -295,19 +305,13 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 				clickObject = it.next();
 				clickObject.setSelected(false);
 			}
-			try {
-				labCash.downloadAlapdij();
-			} catch (SQLException e1) {
-				BaseWindow.makeWarning("SQL parancsfuttatási hiba!", e1, "error", new JFrame());
-			}
-			refreshWithNewDatas();
-			repaint();
 			refresh();
-		}
-		String cmd = e.getActionCommand();
-		if (cmd.equals("reLoad")){
-			startTransaction();
-			refresh();
+		} else if (e.getSource()==category){
+			new LabCashCategory(dao);
+		} else if (e.getSource()==manageItem){
+			new LabCashManage(dao);
+		} else if (e.getSource()==newItem){
+			new LabCashItem(dao);
 		}
 	}
 
@@ -333,8 +337,6 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 					ch.setVisible(true);
 				}
 			}
-			/*repaint();
-		    refresh();*/
 	}
 
 	
@@ -365,12 +367,5 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 		return fizetendo;
 	}
 
-	public boolean isFirstDownload() {
-		return firstDownload;
-	}
-
-	public void setFirstDownload(boolean firstDownload) {
-		this.firstDownload = firstDownload;
-	}
 
 }

@@ -3,6 +3,7 @@ package GUI;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -84,6 +85,8 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 	 */
 	public CentrumLab(){
 		super(670, 650, false, false, "CentrumLab lelet átalakítás", 0, 0, JFrame.DISPOSE_ON_CLOSE, false);
+		
+		setIconImage(Toolkit.getDefaultToolkit().getImage(Const.PROJECT_PATH+"icon_centrumlab.png"));
 		
 		mitCsere = new ArrayList<String>();
 		mireCsere = new ArrayList<String>();

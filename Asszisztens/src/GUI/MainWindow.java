@@ -1,7 +1,10 @@
 package GUI;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -17,6 +20,7 @@ import java.sql.SQLException;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -34,8 +38,8 @@ import javax.swing.border.TitledBorder;
 import tools.Const;
 
 import GUI.CentrumLab;
+import database.DAO;
 import database.DBConnect;
-import database.DatabaseModify;
 import executable.AsszisztensMain;
 
 public class MainWindow implements ActionListener{
@@ -65,13 +69,13 @@ public class MainWindow implements ActionListener{
 	private String status;
 	private String serverDetails;
 	private DBConnect mysql;
-	private DatabaseModify command;
 	
 	private LabCashWindow labCashWindow;
 	private DoctorScheduleWindow doctorScheduleWindow;
 	private CentrumLab c;
 	private JPanel mainMessagePanel;
 	private JProgressBar connectionProgress;
+	private DAO dao;
 	
 	public MainWindow(){
 		
@@ -89,7 +93,7 @@ public class MainWindow implements ActionListener{
 			BaseWindow.makeWarning("SQL parancsfuttatási hiba!", e1, "error", new JFrame());
 		}
 		
-
+		window.setIconImage(Toolkit.getDefaultToolkit().getImage(Const.PROJECT_PATH+"icon.png"));
 		
 	    /** A menusor letrehozasa, beallitasa, hozzaadasa az ablakhoz */
 		newJMenu("Fájl", KeyEvent.VK_F, "Fájl menü");
@@ -100,17 +104,12 @@ public class MainWindow implements ActionListener{
 		newJMenu("Rendelő nyilvántartás", KeyEvent.VK_F, "Lelet menü");
 			newJMenuItem("rendeloBeosztas", "Rendelő beosztás", "", true, new ImageIcon(Const.PROJECT_PATH+"icon_calendar.png"));
 			newJMenuItem("penztar", "Betegelőjegyzés (időpontkiadás)", "", false);
-			newJMenuItem("penztar", "Laborvizsgálat árszámító", "", true);
+			newJMenuItem("penztar", "Laborvizsgálat árszámító", "", true, new ImageIcon(Const.PROJECT_PATH+"icon_lab.png"));
 			newJMenuItem("penztar", "WebLabor", "", false);
 		/*newJMenu("WebLabor (IN PROGRESS)", KeyEvent.VK_F, "Lelet menü");
 			newJMenuItem("ujOrvos", "Új orvos regisztrálása", "");
 			newJMenuItem("szerkesztOrvos", "Orvos szerkesztése (Még nincs...)", "");
 			newJMenuItem("arajanlatKeres", "Árajánlat kérések", "");*/
-		newJMenu("Admin", KeyEvent.VK_F, "Admin");
-			newJMenuItem("kategoriaUj", "Új kategória felvitele", "", true);
-			newJMenuItem("kategoriaSzerk", "Kategória szerkesztése", "", false);
-			newJMenuItem("laborUj", "Új laborvizsgálat felvitele", "", true);
-			newJMenuItem("laborSzerk", "Laborvizsgálat szerkesztése", "", true);
 		newJMenu("Súgó", KeyEvent.VK_S, "");
 			newJMenuItem("errorReport", "Hibabejelentés", "", false);
 			newJMenuItem("about", "Névjegy", "", true);
@@ -134,8 +133,14 @@ public class MainWindow implements ActionListener{
 		calendar.setActionCommand("rendeloBeosztas");
 		calendar.setFocusable(false);
 		
+		JButton lab = new JButton("Laborvizsgálatok", new ImageIcon(Const.PROJECT_PATH+"icon_lab.png"));
+		lab.addActionListener(this);
+		lab.setActionCommand("penztar");
+		lab.setFocusable(false);
+		
 		mainCenterPanel.add(centrumLab);
 		mainCenterPanel.add(calendar);
+		mainCenterPanel.add(lab);
 				
 		window.setTitle(titleString());
 		window.setSize( new Dimension( width, height ) );	
@@ -154,6 +159,7 @@ public class MainWindow implements ActionListener{
 		
 		
 		JSplitPane mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,mainCenterPanel,mainMessagePanel);
+		mainSplit.setEnabled(false);
 		
 		window.add(mainSplit,"Center");
 		
@@ -193,11 +199,11 @@ public class MainWindow implements ActionListener{
 		mysql.setpLabel(statusLabel);
 		mysql.startTheConnection();
 		
-		labCashWindow = new LabCashWindow(mysql);
+		dao = new DAO();
+		
+		labCashWindow = new LabCashWindow(dao);
 		doctorScheduleWindow = new DoctorScheduleWindow(mysql);
 		c = new CentrumLab();
-		
-		command = new DatabaseModify(mysql);
 		
 		downloadDatas();
 	}
@@ -206,10 +212,10 @@ public class MainWindow implements ActionListener{
 		
 		class DownloadFirstTime extends Thread {			
 	         public void run() {	        	 
-	        	while (!labCashWindow.isFirstDownload() || !doctorScheduleWindow.isFirstDownload()){	        		
+	        	while (!dao.isInitialized()){	        		
 	        		if (mysql.isConnection()){	        			
-	        			if (!labCashWindow.isFirstDownload()) labCashWindow.startTransaction();
-	        			if (!doctorScheduleWindow.isFirstDownload()) doctorScheduleWindow.startTransaction();
+	        			dao.init(mysql);
+	        			labCashWindow.init();
 		        	} 		
 	        	}	        		
 	        }	        		        	 
@@ -307,7 +313,7 @@ public class MainWindow implements ActionListener{
 			} else if (cmd=="help"){
 				help();
 			} else if (cmd=="penztar"){
-				if (!labCashWindow.isFirstDownload()) 
+				if (!dao.isInitialized()) 
 					BaseWindow.makeWarning("Még folyik az adatletöltés", new Exception(), "success", new JFrame());
 				else {
 					labCashWindow.setVisible(true);
@@ -318,20 +324,6 @@ public class MainWindow implements ActionListener{
 				
 			} else if (cmd=="arfolyamLekerdezes"){
 				
-			} else if (cmd=="kategoriaUj"){
-				command.newCategory();
-			} else if (cmd=="kategoriaSzerk"){
-				command.editCategory();
-			} else if (cmd=="kategoriaTorol"){
-				command.deleteCategory();
-			} else if (cmd=="laborUj"){
-				command.newRecord();
-			} else if (cmd=="laborSzerk"){
-				try {
-					command.editRecord();
-				} catch (SQLException e1) {
-					BaseWindow.makeWarning("SQL parancsfuttatási hiba!", e1, "error", new JFrame());
-				}
 			} else if (cmd=="arajanlatKeres"){
 				
 			} else if (cmd=="ujOrvos"){
@@ -339,7 +331,7 @@ public class MainWindow implements ActionListener{
 			} else if (cmd=="szerkesztOrvos"){
 				
 			} else if (cmd.equals("rendeloBeosztas")){
-				if (!doctorScheduleWindow.isFirstDownload()) 
+				if (!dao.isInitialized()) 
 					BaseWindow.makeWarning("Még folyik az adatletöltés", new Exception(), "success", new JFrame());
 				else
 					doctorScheduleWindow.setVisible(true);

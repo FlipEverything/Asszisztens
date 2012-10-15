@@ -25,4 +25,9 @@ public class Csoport {
 	public void setNev(String nev) {
 		this.nev = nev;
 	}
+
+	@Override
+	public String toString() {
+		return nev;
+	}
 }

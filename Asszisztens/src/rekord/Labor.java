@@ -12,9 +12,10 @@ public class Labor {
 	private int aranyklinikaAr;
 	private String alapdij;
 	private int csoport;
+	private String allapot;
 	
 	public Labor(int id, String nev1, String nev2, String megj, String ido,
-			int laborAr, int partnerAr, int aranyklinikaAr, String alapdij, int csoport) {
+			int laborAr, int partnerAr, int aranyklinikaAr, String alapdij, int csoport, String allapot) {
 		this.id = id;
 		this.nev1 = nev1;
 		this.nev2 = nev2;
@@ -25,6 +26,11 @@ public class Labor {
 		this.aranyklinikaAr = aranyklinikaAr;
 		this.alapdij = alapdij;
 		this.setCsoport(csoport);
+		this.setAllapot(allapot);
+	}
+	
+	public Labor(){
+		this.id = 0;
 	}
 	
 	public int getId() {
@@ -88,5 +94,28 @@ public class Labor {
 
 	public int getCsoport() {
 		return csoport;
+	}
+	
+	@Override
+	public String toString() {
+		return "<html>" +
+						"<table><tr>" +
+							"<td style='width:300px;'>"+nev1+"</td>" +
+							"<td style='width:150px;'>"+nev2+"</td>" +
+							"<td style='width:50px;'>"+ido+"</td>" +
+							"<td style='width:80px;'>"+laborAr+"</td>" +
+							"<td style='width:80px;'>"+partnerAr+"</td>" +
+							"<td style='width:80px;'>"+aranyklinikaAr+"</td>" +
+							"<td style='width:60px;'>"+allapot+"</td>" +
+						"</tr></table>" +
+					"</html>";
+	}
+
+	public String getAllapot() {
+		return allapot;
+	}
+
+	public void setAllapot(String allapot) {
+		this.allapot = allapot;
 	}
 }

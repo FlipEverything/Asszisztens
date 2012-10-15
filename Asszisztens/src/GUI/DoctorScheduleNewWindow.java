@@ -187,14 +187,16 @@ public class DoctorScheduleNewWindow extends BaseWindow implements ActionListene
 		
         //Lay out the panel.
         makeTheGrid(numPairs, 2, centerPanel);
-
+        //Set up the content pane.
+        centerPanel.setOpaque(true);  //content panes must be opaque
+        
+        
         initComboBoxWithDoctors(datas[0]);
         initComboBoxWithDays(datas[3]);
         initComboBoxWithTime(datas[1]);
         initComboBoxWithTime(datas[2]);
         
-        //Set up the content pane.
-        centerPanel.setOpaque(true);  //content panes must be opaque
+
         
 		contentPanel.add(northPanel,"North");
 		contentPanel.add(centerPanel,"Center");

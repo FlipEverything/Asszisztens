@@ -98,6 +98,10 @@ public abstract class BaseWindow extends JFrame implements ActionListener{
 		}
 	}
 	
+	public static void makeWarning(String errorCode, Exception e, String type){
+		makeWarning(errorCode, e, type, new JFrame());
+	}
+	
 	public static boolean ask(Object[] options, String title, String message, JFrame frame){
 		int n = JOptionPane.showOptionDialog(frame, message, title, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 		if (n == JOptionPane.YES_OPTION){

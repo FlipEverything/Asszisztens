@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
@@ -56,6 +57,7 @@ public class DoctorScheduleWindow extends BaseWindow{
 	
 	public DoctorScheduleWindow(DBConnect mysql){
 		super(0, 0, true, false, "Rendelő beosztás - Orvosok", 0, 0, JFrame.DISPOSE_ON_CLOSE, false);
+		setIconImage(Toolkit.getDefaultToolkit().getImage(Const.PROJECT_PATH+"icon_calendar.png"));
 		
 		newJMenu("Fájl", "");
 			newJMenuItem("reLoad", "Adatok újratöltése", "", false);
