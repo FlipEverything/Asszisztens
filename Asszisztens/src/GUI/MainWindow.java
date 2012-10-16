@@ -102,9 +102,9 @@ public class MainWindow implements ActionListener{
 		newJMenu("Lelet átalakítás", KeyEvent.VK_F, "Lelet menü");
 			newJMenuItem("centrumlab", "Centrumlab lelet feldolgozás", "", true, new ImageIcon(Const.PROJECT_PATH+"icon_centrumlab.png")); 
 		newJMenu("Rendelő nyilvántartás", KeyEvent.VK_F, "Lelet menü");
-			newJMenuItem("rendeloBeosztas", "Rendelő beosztás", "", true, new ImageIcon(Const.PROJECT_PATH+"icon_calendar.png"));
+			newJMenuItem("rendeloBeosztas", "Rendelő beosztás", "", false, new ImageIcon(Const.PROJECT_PATH+"icon_calendar.png"));
 			newJMenuItem("penztar", "Betegelőjegyzés (időpontkiadás)", "", false);
-			newJMenuItem("penztar", "Laborvizsgálat árszámító", "", true, new ImageIcon(Const.PROJECT_PATH+"icon_lab.png"));
+			newJMenuItem("penztar", "Laborvizsgálat árszámító", "", false, new ImageIcon(Const.PROJECT_PATH+"icon_lab.png"));
 			newJMenuItem("penztar", "WebLabor", "", false);
 		/*newJMenu("WebLabor (IN PROGRESS)", KeyEvent.VK_F, "Lelet menü");
 			newJMenuItem("ujOrvos", "Új orvos regisztrálása", "");
@@ -132,11 +132,13 @@ public class MainWindow implements ActionListener{
 		calendar.addActionListener(this);
 		calendar.setActionCommand("rendeloBeosztas");
 		calendar.setFocusable(false);
+		calendar.setEnabled(false);
 		
 		JButton lab = new JButton("Laborvizsgálatok", new ImageIcon(Const.PROJECT_PATH+"icon_lab.png"));
 		lab.addActionListener(this);
 		lab.setActionCommand("penztar");
 		lab.setFocusable(false);
+		lab.setEnabled(false);
 		
 		mainCenterPanel.add(centrumLab);
 		mainCenterPanel.add(calendar);

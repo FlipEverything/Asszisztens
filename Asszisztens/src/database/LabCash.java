@@ -8,6 +8,7 @@ import GUI.BaseWindow;
 import com.mysql.jdbc.Statement;
 
 import rekord.Csoport;
+import rekord.Labor;
 
 
 public class LabCash {
@@ -53,12 +54,39 @@ public class LabCash {
 		}
 	}
 	
-	public static void insertItem(){
-		
+	public static void insertItem(DAO dao, Labor lab) throws SQLException{
+		String sql = "INSERT INTO labor VALUES (id, " +
+				"'"+lab.getNev1()+"', " +
+				"'"+lab.getNev2()+"', " +
+				"'"+lab.getMegj()+"', " +
+				"'"+lab.getIdo()+"', " +
+				""+lab.getLaborAr()+", " +
+				""+lab.getPartnerAr()+", " +
+				""+lab.getAranyklinikaAr()+", " +
+				"'"+lab.getAlapdij()+"', " +
+				""+lab.getCsoport()+", " +
+				"'"+lab.getAllapot()+"');";
+		System.out.println(sql);
+		int id = dao.getMysql().getS()
+				.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
+		lab.setId(id);
+		dao.getLabor().add(lab);
 	}
 	
-	public static void editItem(){
-		
+	public static void editItem(DAO dao, Labor lab) throws SQLException{
+		String sql = "UPDATE labor" +
+				" SET nev1='"+lab.getNev1()+"', " +
+				" nev2='"+lab.getNev2()+"', " +
+				" megj='"+lab.getMegj()+"', " +
+				" ido='"+lab.getIdo()+"', " +
+				" labor_ar="+lab.getLaborAr()+", " +
+				" partner_ar="+lab.getPartnerAr()+", " +
+				" aranyklinika_ar="+lab.getAranyklinikaAr()+", " +
+				" alapdij='"+lab.getAlapdij()+"', " +
+				" csoport="+lab.getCsoport()+", " +
+				" allapot='"+lab.getAllapot()+"' WHERE id ="+lab.getId()+";";
+		System.out.println(sql);
+		dao.getMysql().exec(sql);
 	}
 
 	

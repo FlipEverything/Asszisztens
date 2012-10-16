@@ -2,6 +2,7 @@ package GUI;
 
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.sql.SQLException;
 import java.util.Iterator;
 
 import javax.swing.JButton;
@@ -20,6 +21,7 @@ import tools.Const;
 import layout.SpringUtilities;
 
 import database.DAO;
+import database.LabCash;
 
 public class LabCashItem extends BaseWindow{
 	/**
@@ -27,12 +29,24 @@ public class LabCashItem extends BaseWindow{
 	 */
 	private static final long serialVersionUID = 6534350561469847538L;
 	private DAO dao;
+	private Labor l;
+	private JTextField nev;
+	private JTextField nev2;
+	private JTextField megj;
+	private JSpinner laborAr;
+	private JSpinner partnerAr;
+	private JSpinner aranyAr;
+	private JComboBox alapdij;
+	private JComboBox csoport;
+	private JComboBox allapot;
+	private JTextField ido;
 
 	public LabCashItem(DAO dao){
 		super(400, 380, false, true, "Új laborvizsgálat felvitele", 0, 0, JFrame.HIDE_ON_CLOSE, false);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(Const.PROJECT_PATH+"icon_new.png"));
 		this.dao = dao;
 		
+		l = null;
 		add(makePanel(new Labor()));
 	}
 	
@@ -41,6 +55,7 @@ public class LabCashItem extends BaseWindow{
 		setIconImage(Toolkit.getDefaultToolkit().getImage(Const.PROJECT_PATH+"icon_edit.png"));
 		this.dao = dao;
 		
+		this.l=l;
 		add(makePanel(l));
 	}
 
@@ -50,41 +65,45 @@ public class LabCashItem extends BaseWindow{
     	
         //Név1
     	editPanel.add(new JLabel("Elsődleges név:"));
-    	editPanel.add(new JTextField(l.getNev1()));
+    	nev = new JTextField(l.getNev1());
+    	editPanel.add(nev);
     	
     	//Név2
     	editPanel.add(new JLabel("Másodlagos név:"));
-    	editPanel.add(new JTextField(l.getNev2()));
+    	nev2 = new JTextField(l.getNev2());
+    	editPanel.add(nev2);
     	
     	//Megjegyzés
     	editPanel.add(new JLabel("Megjegyzés:"));
-    	editPanel.add(new JTextField(l.getMegj()));	
+    	megj = new JTextField(l.getMegj());
+    	editPanel.add(megj);	
     
     	//Elkészítési idő
     	editPanel.add(new JLabel("Vizsgálati idő:"));
-    	editPanel.add(new JTextField(l.getId()));
+    	ido = new JTextField(l.getIdo());
+    	editPanel.add(ido);
     	
     	//Labor ár
-    	editPanel.add(new JLabel("Labor ár:"));
-    	JSpinner laborAr = new JSpinner();
+    	editPanel.add(new JLabel("Klinika ár:"));
+    	laborAr = new JSpinner();
     	laborAr.setValue(l.getLaborAr());
     	editPanel.add(laborAr);
     	
     	//Partner ár
-    	editPanel.add(new JLabel("Partner ár:"));
-    	JSpinner partnerAr = new JSpinner();
+    	editPanel.add(new JLabel("CentrumLab ár:"));
+    	partnerAr = new JSpinner();
     	partnerAr.setValue(l.getPartnerAr());
     	editPanel.add(partnerAr);
     	
     	//Aranyklinika ár
     	editPanel.add(new JLabel("Aranyklinika ár:"));
-    	JSpinner aranyAr = new JSpinner();
+    	aranyAr = new JSpinner();
     	aranyAr.setValue(l.getAranyklinikaAr());
     	editPanel.add(aranyAr);
     	
     	//Alapdíj-e
     	editPanel.add(new JLabel("Alapdíjként felszámoljuk-e:"));
-    	JComboBox alapdij = new JComboBox();
+    	alapdij = new JComboBox();
     	alapdij.addItem("nem");
     	alapdij.addItem("igen");
     	if (l.getAlapdij()!=null){
@@ -98,7 +117,7 @@ public class LabCashItem extends BaseWindow{
     	
     	//Kategória
     	editPanel.add(new JLabel("Kategória:"));
-    	JComboBox csoport = new JComboBox();
+    	csoport = new JComboBox();
         csoport.addItem("-- Válasszon! --");
         Iterator<Csoport> cs = dao.getLaborCsoport().iterator();
         while (cs.hasNext()){
@@ -111,7 +130,7 @@ public class LabCashItem extends BaseWindow{
     	
     	//Állapot
     	editPanel.add(new JLabel("Állapot (megjelenik-e):"));
-        JComboBox allapot = new JComboBox();
+        allapot = new JComboBox();
         allapot.addItem("aktiv");
         allapot.addItem("passziv");
         if (l.getAllapot()!=null){
@@ -128,10 +147,15 @@ public class LabCashItem extends BaseWindow{
     	
     	JButton edit = new JButton("Rögzít");
     	edit.addActionListener(this);
-    	//edit.setActionCommand(actCommand);
+    	if (l.getId()==0){
+    		edit.setActionCommand("create");
+    		System.out.println("Create");
+    	} else {
+    		edit.setActionCommand("edit");
+    		System.out.println("Edit");
+    	}
     	editPanel.add(edit);
     
-    	
         //Lay out the panel.
         makeTheGrid(11, 2, editPanel);
         //Set up the content pane.
@@ -149,7 +173,53 @@ public class LabCashItem extends BaseWindow{
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-		
+		if (e.getActionCommand()=="create"){
+			int cs1 = 0;
+			Iterator<Csoport> it = dao.getLaborCsoport().iterator();
+			while (it.hasNext()){
+				Csoport cs = it.next();
+				if (cs.getNev().equals((csoport.getSelectedItem()))){
+					cs1 = cs.getId();
+					break;
+				}
+			}
+			
+			Labor lab = new Labor(0, nev.getText(), nev2.getText(), megj.getText(), ido.getText(), (Integer)(laborAr.getValue()), (Integer)partnerAr.getValue(), (Integer)aranyAr.getValue(), (String)alapdij.getSelectedItem(), cs1, (String)allapot.getSelectedItem());
+			try {
+				LabCash.insertItem(dao, lab);
+				setVisible(false);
+			} catch (SQLException e1) {
+				BaseWindow.makeWarning("Nem tudtam a laborvizsgálatot beszúrni!", e1, "error");
+			}
+			setVisible(false);
+		} else if (e.getActionCommand()=="edit"){
+			int cs1 = 0;
+			Iterator<Csoport> it = dao.getLaborCsoport().iterator();
+			while (it.hasNext()){
+				Csoport cs = it.next();
+				if (cs.getNev().equals((csoport.getSelectedItem()))){
+					cs1 = cs.getId();
+					break;
+				}
+			}
+			
+			l.setNev1(nev.getText());
+			l.setNev2(nev2.getText());
+			l.setMegj(megj.getText());
+			l.setIdo(ido.getText());
+			l.setLaborAr((Integer)laborAr.getValue());
+			l.setPartnerAr((Integer)partnerAr.getValue());
+			l.setAranyklinikaAr((Integer)aranyAr.getValue());
+			l.setAlapdij((String)alapdij.getSelectedItem());
+			l.setCsoport(cs1);
+			l.setAllapot((String)allapot.getSelectedItem());
+			try {
+				LabCash.editItem(dao, l);
+				setVisible(false);
+			} catch (SQLException e1) {
+				BaseWindow.makeWarning("Nem tudtam a laborvizsgálatot szerkeszteni!", e1, "error");
+			}
+
+		}
 	}
 }

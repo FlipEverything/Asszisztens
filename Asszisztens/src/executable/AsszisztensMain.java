@@ -16,7 +16,7 @@ public class AsszisztensMain{
 	///
 	private static ServerSocket SERVER_SOCKET;
 	public MainWindow applicationWindow;
-	private static boolean DEBUG = true;
+	private static boolean DEBUG = false;
 	///
 	
 	public AsszisztensMain() throws SQLException{
@@ -25,9 +25,16 @@ public class AsszisztensMain{
 	}
 	
 	public static void main(String[] args) {
+		if (args.length>0){
+			if (args[0].equals("-debug") && (args[1].equals("aj6720ldd"))){
+				DEBUG = true;
+			}
+		}
+		
+		final boolean appStartMode = DEBUG;
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-            	if (DEBUG){
+            	if (appStartMode){
             		startTheMainApplication();
             	} else {
             		PasswordProtection.createAndShowGUI();	

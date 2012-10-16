@@ -35,6 +35,7 @@ import layout.SpringUtilities;
 import org.apache.pdfbox.Overlay;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSString;
+import org.apache.pdfbox.examples.pdmodel.CreateBlankPDF;
 import org.apache.pdfbox.exceptions.COSVisitorException;
 import org.apache.pdfbox.pdfparser.PDFStreamParser;
 import org.apache.pdfbox.pdfwriter.ContentStreamWriter;
@@ -319,7 +320,14 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 	
 	public void addWatermark(String fileName){
 		try {
+			PDDocument onePageWatermark = PDDocument.load(fileName);
 			watermarkDoc = PDDocument.load(fileName);
+			List<?> watermarkPages = onePageWatermark.getDocumentCatalog().getAllPages();
+			List<?> pages = doc.getDocumentCatalog().getAllPages();
+			for (int i=0; i<pages.size()-1; i++){
+				watermarkDoc.importPage((PDPage) watermarkPages.get(0));
+			}
+			
 			Overlay overlay = new Overlay();
 			overlay.overlay(doc, watermarkDoc);
 		} catch (IOException e) {

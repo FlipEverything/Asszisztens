@@ -1,23 +1,16 @@
 package GUI;
 
-import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.sql.SQLException;
 import java.util.Iterator;
 
 import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextField;
 
 import rekord.Labor;
 import tools.Const;
@@ -79,8 +72,8 @@ public class LabCashManage extends BaseWindow{
 						"<td style='width:300px;'><b>Név1</b></td>" +
 						"<td style='width:150px;'><b>Név2</b></td>" +
 						"<td style='width:50px;'><b>Idő</b></td>" +
-						"<td style='width:80px;'><b>Laborár</b></td>" +
-						"<td style='width:80px;'><b>PartnerÁr</b></td>" +
+						"<td style='width:80px;'><b>KlinikaÁr</b></td>" +
+						"<td style='width:80px;'><b>CentrumLabÁr</b></td>" +
 						"<td style='width:80px;'><b>AranyÁr</b></td>" +
 						"<td style='width:60px;'><b>Állapot</b></td>" +
 					"</tr></table>" +
@@ -95,7 +88,6 @@ public class LabCashManage extends BaseWindow{
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
 		
 	}
 }

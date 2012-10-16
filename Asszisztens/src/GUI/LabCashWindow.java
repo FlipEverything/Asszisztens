@@ -8,6 +8,8 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
@@ -15,6 +17,7 @@ import java.util.Iterator;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -35,7 +38,7 @@ import rekord.Labor;
 import tools.Const;
 
 
-public class LabCashWindow extends BaseWindow implements ItemListener, ActionListener, DocumentListener {
+public class LabCashWindow extends BaseWindow implements ItemListener, ActionListener, DocumentListener, FocusListener {
 	/**
 	 * 
 	 */
@@ -50,9 +53,9 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 	private JLabel kasszaVegosszeg;
 	private JButton deselectAll;
 	private JTextField kereses;
-	
-	private ArrayList<JCheckBox> checkBoxLista;
-	private ArrayList<Labor> valasztott;
+	private JButton category;
+	private JButton newItem;
+	private JButton manageItem;
 	
 	//Window dimensions & options
 	private static String title = "Labor fizetés összesítő";
@@ -75,9 +78,9 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 	//Database connection
 	private int fizetendo;
 	private DAO dao;
-	private JButton category;
-	private JButton newItem;
-	private JButton manageItem;
+	private ArrayList<JCheckBox> checkBoxLista;
+	private ArrayList<Labor> valasztott;
+
 	
 	public LabCashWindow(DAO dao){
 		super(preferredWidth, preferredHeight, resizable, visible, title, locationX, locationY, defaultCloseOperation, exit);
@@ -280,6 +283,7 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 						setFizetendo(getFizetendo()+dao.getLabor().get(i).getAranyklinikaAr());
 						valasztott.add(dao.getLabor().get(i));
 					}
+					break;
 				}
 				i++;
 		}
@@ -366,6 +370,19 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 	public int getFizetendo() {
 		return fizetendo;
 	}
+
+	@Override
+	public void focusGained(FocusEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void focusLost(FocusEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 
 }
