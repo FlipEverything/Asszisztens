@@ -65,10 +65,10 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 	
 	//Window dimensions & options
 	private static String title = "Labor fizetés összesítő";
-	private static int preferredHeight = 800;
-	private static int preferredWidth = 1200;
-	private static int height = 800;
-	private static int width = 1200;
+	private static int preferredHeight = 0;
+	private static int preferredWidth = 0;
+	private static int height = 0;
+	private static int width = 0;
 	private static int locationX = 0;
 	private static int locationY = 0;
 	private static boolean resizable = true;
