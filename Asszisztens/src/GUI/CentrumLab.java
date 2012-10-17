@@ -35,7 +35,6 @@ import layout.SpringUtilities;
 import org.apache.pdfbox.Overlay;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSString;
-import org.apache.pdfbox.examples.pdmodel.CreateBlankPDF;
 import org.apache.pdfbox.exceptions.COSVisitorException;
 import org.apache.pdfbox.pdfparser.PDFStreamParser;
 import org.apache.pdfbox.pdfwriter.ContentStreamWriter;
@@ -95,13 +94,22 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 		mitCsere.add(new String("Centrum-Lab Kft Kiskõrösi Laboratóriuma"));
 		mireCsere.add(new String("            Aranyklinika Kft"));
 		
+		mitCsere.add(new String("Centrum-Lab Kft Központi Laboratóriuma"));
+		mireCsere.add(new String("            Aranyklinika Kft"));
+		
 		mitCsere.add(new String("Szakmai vezetõ: Dr. Széles Ilona"));
 		mireCsere.add(new String("6720 Szeged, Arany János utca 14."));
 		
 		mitCsere.add(new String("Vezetõ asszisztens: Gálik Sándorné"));
 		mireCsere.add(new String("        Tel: 20/573-54-34"));
 		
+		mitCsere.add(new String("Vezetõ asszisztens: Ruzsányi Edit"));
+		mireCsere.add(new String("        Tel: 20/573-54-34"));
+		
 		mitCsere.add(new String("6200 Kiskõrös, Petõfi tér 12."));
+		mireCsere.add(new String("           30/561-10-98"));
+		
+		mitCsere.add(new String("1024 Budapest, Lövõház u. 1-5."));
 		mireCsere.add(new String("           30/561-10-98"));
 		
 		mitCsere.add(new String("Tel: \\+36 78 414-754"));

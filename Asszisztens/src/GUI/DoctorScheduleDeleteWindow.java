@@ -19,7 +19,8 @@ import javax.swing.JScrollPane;
 import rekord.RendeloIdopont;
 import rekord.RendeloOrvos;
 
-import database.DoctorScheduleDatabase;
+import database.DAO;
+import database.DoctorSchedule;
 
 public class DoctorScheduleDeleteWindow extends BaseWindow{
 	
@@ -31,18 +32,18 @@ public class DoctorScheduleDeleteWindow extends BaseWindow{
 	private int topSize = 30;
 	private JComboBox orvosLista;
 
-	private DoctorScheduleDatabase dsObject;
-
 	private JList list;
 	private JPanel buttonBar;
 
 	private JButton get;
+
+	private DAO dao;
 	
 	//private DoctorScheduleDatabase dsObject;
 	
-	public DoctorScheduleDeleteWindow(DoctorScheduleDatabase dsObject){
+	public DoctorScheduleDeleteWindow(DAO dao){
 		super(500, 450, false, false, "Rendelő beosztás: Időpont törlése (lemondás)", 0, 0, JFrame.DISPOSE_ON_CLOSE, false);
-		this.dsObject = dsObject;
+		this.dao = dao;
 		
 		setLayout(new BorderLayout());
 		
@@ -97,7 +98,7 @@ public class DoctorScheduleDeleteWindow extends BaseWindow{
 		int index = 0;
 		c.insertItemAt("---Válasszon orvost!---", index++);
 		c.setSelectedIndex(0);
-		Iterator<RendeloOrvos> it = dsObject.getOrvosTomb().iterator();
+		Iterator<RendeloOrvos> it = dao.getOrvosTomb().iterator();
 		while (it.hasNext()){
 			c.insertItemAt(it.next(), index++);
 		}
@@ -105,7 +106,7 @@ public class DoctorScheduleDeleteWindow extends BaseWindow{
 	
 	public void addDoctorData(){
 		RendeloOrvos orvos = (RendeloOrvos) orvosLista.getModel().getSelectedItem();
-		Iterator<RendeloIdopont> it = dsObject.getIdopontTomb().iterator();
+		Iterator<RendeloIdopont> it = dao.getIdopontTomb().iterator();
 		
 		DefaultListModel dlm = (DefaultListModel) list.getModel();
 		int index=0;

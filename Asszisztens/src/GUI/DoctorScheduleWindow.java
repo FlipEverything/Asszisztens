@@ -8,7 +8,6 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Iterator;
@@ -31,15 +30,14 @@ import rekord.RendeloOrvos;
 import rekord.RendeloSzoba;
 import tools.Const;
 
-import database.DBConnect;
-import database.DoctorScheduleDatabase;
+import database.DAO;
 
 public class DoctorScheduleWindow extends BaseWindow{
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 6137634184562239340L;
-	DoctorScheduleDatabase dsObject;
+	DAO dao;
 	
 	private DoctorScheduleDataWindow torzsadat;
 	private DoctorScheduleDeleteWindow torolIdopont;
@@ -53,11 +51,11 @@ public class DoctorScheduleWindow extends BaseWindow{
 	
 	private JPanel colors;
 	
-	private boolean firstDownload;
-	
-	public DoctorScheduleWindow(DBConnect mysql){
+	public DoctorScheduleWindow(DAO dao){
 		super(0, 0, true, false, "Rendelő beosztás - Orvosok", 0, 0, JFrame.DISPOSE_ON_CLOSE, false);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(Const.PROJECT_PATH+"icon_calendar.png"));
+		
+		this.dao = dao;
 		
 		newJMenu("Fájl", "");
 			newJMenuItem("reLoad", "Adatok újratöltése", "", false);
@@ -67,111 +65,95 @@ public class DoctorScheduleWindow extends BaseWindow{
 			newJMenuItem("delete", "Rögzített időpontok lekérdezése és törlése", "", true);
 			newJMenuItem("delete", "Szabadság bejegyzése (ismétlődő időpont)", "", false);
 		setMenu();
-		
-		dsObject = new DoctorScheduleDatabase(mysql);
-		
-		setFirstDownload(false);
 	}
 	
-	public void startTransaction(){
-		try {
-			dsObject.downloadIdopont();
-			dsObject.downloadOrvos();
-			dsObject.downloadSzoba();
+	
+	public void refreshGUI(){
+		setLayout(new BorderLayout());
+		
+		JPanel topPanel = new JPanel(new FlowLayout());
+		//JPanel bottomPanel = new JPanel(new GridLayout());
+		
+		JScrollPane bottom = new JScrollPane(calendar);
+		
+		topPanel.setPreferredSize(new Dimension(getWidth(),topSize));
+		bottom.setPreferredSize(new Dimension(getWidth(),getHeight()-topSizeScroll));
+		//bottomPanel.setPreferredSize(new Dimension(getWidth()-20,getHeight()-topSize-20));
+		
+		
+		colors = new JPanel();
+		
+		generateColorsPanel();
+		
+		szobaLista = new JComboBox();
+		szobaLista.setPreferredSize(new Dimension(200, 20));
+		initComboBoxWithRooms(szobaLista);
+		szobaLista.addActionListener(new ActionListener() {
 			
-			init();
-			
-			setLayout(new BorderLayout());
-			
-			JPanel topPanel = new JPanel(new FlowLayout());
-			//JPanel bottomPanel = new JPanel(new GridLayout());
-			
-			JScrollPane bottom = new JScrollPane(calendar);
-			
-			topPanel.setPreferredSize(new Dimension(getWidth(),topSize));
-			bottom.setPreferredSize(new Dimension(getWidth(),getHeight()-topSizeScroll));
-			//bottomPanel.setPreferredSize(new Dimension(getWidth()-20,getHeight()-topSize-20));
-			
-	        
-	        colors = new JPanel();
-	        
-	        generateColorsPanel();
-			
-			szobaLista = new JComboBox();
-			szobaLista.setPreferredSize(new Dimension(200, 20));
-			initComboBoxWithRooms(szobaLista);
-			szobaLista.addActionListener(new ActionListener() {
-				
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					int id = szobaLista.getSelectedIndex();
-	        		if (id>0){
-	        			calendar.setVisible(true);
-	        		} else {
-	        			calendar.setVisible(false);
-	        		}
-					calendar.validate();
-					calendar.repaint();
-					generateColorsPanel();
-					colors.validate();
-					colors.repaint();			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				int id = szobaLista.getSelectedIndex();
+				if (id>0){
+					calendar.setVisible(true);
+				} else {
+					calendar.setVisible(false);
 				}
-			});
+				calendar.validate();
+				calendar.repaint();
+				generateColorsPanel();
+				colors.validate();
+				colors.repaint();			
+			}
+		});
+		
+		hetLista = new JComboBox();
+		hetLista.setPreferredSize(new Dimension(200, 20));
+		hetLista.addActionListener(new ActionListener() {
 			
-			hetLista = new JComboBox();
-			hetLista.setPreferredSize(new Dimension(200, 20));
-			hetLista.addActionListener(new ActionListener() {
-				
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-	        		int id = szobaLista.getSelectedIndex();
-	        		if (id>0){
-	        			calendar.setVisible(true);
-	        		} else {
-	        			calendar.setVisible(false);
-	        		}
-					calendar.validate();
-					calendar.repaint();
-					generateColorsPanel();
-					colors.validate();
-					colors.repaint();			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				int id = szobaLista.getSelectedIndex();
+				if (id>0){
+					calendar.setVisible(true);
+				} else {
+					calendar.setVisible(false);
 				}
-			});
-			
-			calendar.setVisible(false);
-			calendar.setFocusable(false);
-			calendar.setRowSelectionAllowed(false);
-			
-			initComboBoxWithWeeks(hetLista);
-			
-			JLabel l = new JLabel("Válasszon megjeleníteni kívánt rendelőt: ", JLabel.TRAILING);
-	        topPanel.add(l);
-	        l.setLabelFor(szobaLista);
-	        topPanel.add(szobaLista);
-	        
-	        JLabel l2 = new JLabel("Válasszon megjeleníteni kívánt hetet: ", JLabel.TRAILING);
-	        topPanel.add(l2);
-	        l2.setLabelFor(hetLista);
-	        topPanel.add(hetLista);
-	        
-			add(topPanel,"North");
-			add(bottom,"Center");
-			add(colors,"South");
-			
-			setFirstDownload(true);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+				calendar.validate();
+				calendar.repaint();
+				generateColorsPanel();
+				colors.validate();
+				colors.repaint();			
+			}
+		});
+		
+		calendar.setVisible(false);
+		calendar.setFocusable(false);
+		calendar.setRowSelectionAllowed(false);
+		
+		initComboBoxWithWeeks(hetLista);
+		
+		JLabel l = new JLabel("Válasszon megjeleníteni kívánt rendelőt: ", JLabel.TRAILING);
+		topPanel.add(l);
+		l.setLabelFor(szobaLista);
+		topPanel.add(szobaLista);
+		
+		JLabel l2 = new JLabel("Válasszon megjeleníteni kívánt hetet: ", JLabel.TRAILING);
+		topPanel.add(l2);
+		l2.setLabelFor(hetLista);
+		topPanel.add(hetLista);
+		
+		add(topPanel,"North");
+		add(bottom,"Center");
+		add(colors,"South");
 
 	}
 	
 	public void generateColorsPanel(){
-		int count = dsObject.getOrvosTomb().size();
+		int count = dao.getOrvosTomb().size();
 		int oneLine = getWidth()/200;
 		colors.removeAll();
 		colors.setLayout(new GridLayout(count/oneLine, oneLine));
-		Iterator<RendeloOrvos> orvosIt = dsObject.getOrvosTomb().iterator();
+		Iterator<RendeloOrvos> orvosIt = dao.getOrvosTomb().iterator();
         while (orvosIt.hasNext()){
         	RendeloOrvos r = orvosIt.next();
         	colors.add(new JLabel("<html><table><tr><td style='width: 10px; height: 10px; background-color: "+Integer.toHexString( r.getSzin().getRGB() & 0x00ffffff )+"'>&nbsp;</td><td>"+r.getNev()+"</td></tr></table></html>"));
@@ -179,9 +161,9 @@ public class DoctorScheduleWindow extends BaseWindow{
 	}
 	
 	public void init(){
-		torzsadat = new DoctorScheduleDataWindow(dsObject);
-		torolIdopont = new DoctorScheduleDeleteWindow(dsObject);
-		ujIdopont = new DoctorScheduleNewWindow(dsObject);
+		torzsadat = new DoctorScheduleDataWindow(dao);
+		torolIdopont = new DoctorScheduleDeleteWindow(dao);
+		ujIdopont = new DoctorScheduleNewWindow(dao);
 		
 		
 		TableModel dataModel = new AbstractTableModel() {
@@ -262,7 +244,7 @@ public class DoctorScheduleWindow extends BaseWindow{
 		        	try {
 		        		RendeloSzoba sz = (RendeloSzoba) szobaLista.getModel().getSelectedItem();
 		        		int id = sz.getId();
-		        		Iterator<RendeloIdopont> it = dsObject.getIdopontTomb().iterator();
+		        		Iterator<RendeloIdopont> it = dao.getIdopontTomb().iterator();
 		        		DateFormat formatter = null;
 						Date tol = null;
 						Date ig = null;
@@ -295,9 +277,9 @@ public class DoctorScheduleWindow extends BaseWindow{
 									(cellaKezdet.get(Calendar.MILLISECONDS_IN_DAY) >= tombKezdet.get(Calendar.MILLISECONDS_IN_DAY)) &&
 									((cellaVeg.get(Calendar.MILLISECONDS_IN_DAY)) <= tombVeg.get(Calendar.MILLISECONDS_IN_DAY));
 		    				if (azonosNap && azonosIdo && azonosSzoba){
-		    					Color szin = dsObject.getDoctorColorById(r.getOrvosId());
+		    					Color szin = dao.getDoctorColorById(r.getOrvosId());
 		    					
-		    					return "<html><div style='width: "+getWidth()/columnNames.length+"; height: 100%; color: "+getFontColorBasedOnBGBrightness(szin)+"; background-color: "+Integer.toHexString( szin.getRGB() & 0x00ffffff )+";'>"+dsObject.getDoctorNameById(r.getOrvosId())+"</div></html>";
+		    					return "<html><div style='width: "+getWidth()/columnNames.length+"; height: 100%; color: "+getFontColorBasedOnBGBrightness(szin)+"; background-color: "+Integer.toHexString( szin.getRGB() & 0x00ffffff )+";'>"+dao.getDoctorNameById(r.getOrvosId())+"</div></html>";
 		    				}
 		        		}
 						return null;
@@ -313,13 +295,15 @@ public class DoctorScheduleWindow extends BaseWindow{
 
 		};
 		calendar = new JTable(dataModel);
+		
+		refreshGUI();
 	}
 
 	private void initComboBoxWithRooms(JComboBox c){
 		int index = 0;
 		c.insertItemAt("---Válasszon rendelőt!---", index++);
 		c.setSelectedIndex(0);
-		Iterator<RendeloSzoba> it = dsObject.getSzobaTomb().iterator();
+		Iterator<RendeloSzoba> it = dao.getSzobaTomb().iterator();
 		while (it.hasNext()){
 			c.insertItemAt(it.next(), index++);
 		}
@@ -374,12 +358,5 @@ public class DoctorScheduleWindow extends BaseWindow{
 			calendar.repaint();
 		}
 	}
-
-	public boolean isFirstDownload() {
-		return firstDownload;
-	}
-
-	public void setFirstDownload(boolean firstDownload) {
-		this.firstDownload = firstDownload;
-	}
+	
 }

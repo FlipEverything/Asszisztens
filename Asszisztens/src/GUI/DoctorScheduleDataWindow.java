@@ -23,7 +23,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
-import database.DoctorScheduleDatabase;
+import database.DAO;
+import database.DoctorSchedule;
 
 public class DoctorScheduleDataWindow extends BaseWindow implements ActionListener{
 	/**
@@ -38,16 +39,16 @@ public class DoctorScheduleDataWindow extends BaseWindow implements ActionListen
 	private JList szobaList;
 	
 	private JSplitPane torzsadatSplit;
-	
-	private DoctorScheduleDatabase dsObject;
+
+	private DAO dao;
 	
 	//0: orvos
 	//1: szoba
 	
-	public DoctorScheduleDataWindow(DoctorScheduleDatabase dsObject){
+	public DoctorScheduleDataWindow(DAO dao){
 		super(640, 350, false, false, "Rendelő beosztás: Törzsadatok szerkesztése", 0, 0, JFrame.DISPOSE_ON_CLOSE, false);
 		
-		this.dsObject = dsObject;
+		this.dao = dao;
 		
 		orvosModel = new DefaultListModel();
 		szobaModel = new DefaultListModel();
@@ -56,8 +57,8 @@ public class DoctorScheduleDataWindow extends BaseWindow implements ActionListen
 		szobaList = new JList(szobaModel);
 		
 		
-		initList(orvosModel,dsObject.getOrvosTomb());
-		initList(szobaModel,dsObject.getSzobaTomb());
+		initList(orvosModel,dao.getOrvosTomb());
+		initList(szobaModel,dao.getSzobaTomb());
 		
 		torzsadatSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, torzsLekerdez(orvosList, "0", "Orvosok"), torzsLekerdez(szobaList, "1", "Rendelők"));
 		torzsadatSplit.setOneTouchExpandable(false);
@@ -178,7 +179,7 @@ public class DoctorScheduleDataWindow extends BaseWindow implements ActionListen
 	                    null,
 	                    list.getSelectedValue().toString());
 				if ((s != null) && (s.length() > 0)) {
-					dsObject.edit(command, list.getSelectedValue().toString(), s);
+					DoctorSchedule.edit(dao, command, list.getSelectedValue().toString(), s);
 					refreshLists();
 				}
 			} else {
@@ -188,7 +189,7 @@ public class DoctorScheduleDataWindow extends BaseWindow implements ActionListen
 			if (list.getSelectedIndex()!=-1){
 				Object[] o = {"Igen","Nem"};
 				if (ask(o, "Biztosan törlöd?", list.getSelectedValue().toString(), (JFrame)this)==true){
-					dsObject.delete(command, list.getSelectedValue().toString());
+					DoctorSchedule.delete(dao, command, list.getSelectedValue().toString());
 					refreshLists();				
 				}
 			} else {
@@ -201,7 +202,7 @@ public class DoctorScheduleDataWindow extends BaseWindow implements ActionListen
                     "Új felvitele",
                     JOptionPane.PLAIN_MESSAGE);
 			if ((s2 != null) && (s2.length() > 0)) {
-				dsObject.insert(command, s2);
+				DoctorSchedule.insert(dao, command, s2);
 				refreshLists();	
 			}
 		}
@@ -212,8 +213,8 @@ public class DoctorScheduleDataWindow extends BaseWindow implements ActionListen
 	public void refreshLists(){
 		removeList(orvosModel);
 		removeList(szobaModel);
-		initList(orvosModel,dsObject.getOrvosTomb());
-		initList(szobaModel,dsObject.getSzobaTomb());
+		initList(orvosModel,dao.getOrvosTomb());
+		initList(szobaModel,dao.getSzobaTomb());
 		refreshList(orvosList);
 		refreshList(szobaList);
 	}

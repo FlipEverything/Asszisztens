@@ -42,7 +42,8 @@ import com.ibm.icu.text.DateFormat;
 import com.ibm.icu.text.SimpleDateFormat;
 import com.ibm.icu.util.Calendar;
 
-import database.DoctorScheduleDatabase;
+import database.DAO;
+import database.DoctorSchedule;
 
 public class DoctorScheduleNewWindow extends BaseWindow implements ActionListener{
 	
@@ -79,17 +80,17 @@ public class DoctorScheduleNewWindow extends BaseWindow implements ActionListene
 	private String command2 = "Válasszon rendelőt:";
 	
 	private DateFormat format;
-	
-	DoctorScheduleDatabase dsObject;
 
 	private Date tol;
 
 	private Date ig;
+
+	private DAO dao;
 	
-	public DoctorScheduleNewWindow(DoctorScheduleDatabase dsObject){
+	public DoctorScheduleNewWindow(DAO dao){
 		super(420, height, false, false, "Rendelő beosztás: Új időpont felvitele", 0, 0, JFrame.DISPOSE_ON_CLOSE, false);
 		
-		this.dsObject = dsObject;
+		this.dao = dao;
 		
 		setLayout(new BorderLayout());
 		
@@ -240,7 +241,7 @@ public class DoctorScheduleNewWindow extends BaseWindow implements ActionListene
 					}  
 					
 					try {
-						dsObject.addNewSchedule(tol, ig, szobaId, o.getId(), alkalom);
+						DoctorSchedule.addNewSchedule(dao, tol, ig, szobaId, o.getId(), alkalom);
 					} catch (NumberFormatException e1) {
 						BaseWindow.makeWarning("Nem sikerült létrehozni az időpontot!", e1, "error", (JFrame)this);
 					}
@@ -318,7 +319,7 @@ public class DoctorScheduleNewWindow extends BaseWindow implements ActionListene
 							igString = date.getText()+" "+datas[2].getSelectedItem().toString();
 							tol = format.parse(tolString);
 							ig = format.parse(igString);
-							result = dsObject.searchForFreeRooms(tol, ig, "alkalmi", o.getId());
+							result = DoctorSchedule.searchForFreeRooms(dao, tol, ig, "alkalmi", o.getId());
 						} else if (ismetlodo.getModel()==valasztottGomb.getSelection()){
 							Calendar c = Calendar.getInstance();
 							c.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
@@ -329,7 +330,7 @@ public class DoctorScheduleNewWindow extends BaseWindow implements ActionListene
 							igString = df.format(c.getTime())+" "+datas[2].getSelectedItem().toString();
 							tol = format.parse(tolString);
 							ig = format.parse(igString);
-							result = dsObject.searchForFreeRooms(tol, ig, "ismetlodo", o.getId());
+							result = DoctorSchedule.searchForFreeRooms(dao, tol, ig, "ismetlodo", o.getId());
 						}
 					} catch (ParseException e2) {
 						BaseWindow.makeWarning("Hiba!", e2, "error", this);
@@ -494,7 +495,7 @@ public class DoctorScheduleNewWindow extends BaseWindow implements ActionListene
 		int index = 0;
 		c.insertItemAt("---Válasszon orvost!---", index++);
 		c.setSelectedIndex(0);
-		Iterator<RendeloOrvos> it = dsObject.getOrvosTomb().iterator();
+		Iterator<RendeloOrvos> it = dao.getOrvosTomb().iterator();
 		while (it.hasNext()){
 			c.insertItemAt(it.next(), index++);
 		}

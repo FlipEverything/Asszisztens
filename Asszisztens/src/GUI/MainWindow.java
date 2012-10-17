@@ -1,9 +1,7 @@
 package GUI;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -20,7 +18,6 @@ import java.sql.SQLException;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -102,9 +99,9 @@ public class MainWindow implements ActionListener{
 		newJMenu("Lelet átalakítás", KeyEvent.VK_F, "Lelet menü");
 			newJMenuItem("centrumlab", "Centrumlab lelet feldolgozás", "", true, new ImageIcon(Const.PROJECT_PATH+"icon_centrumlab.png")); 
 		newJMenu("Rendelő nyilvántartás", KeyEvent.VK_F, "Lelet menü");
-			newJMenuItem("rendeloBeosztas", "Rendelő beosztás", "", false, new ImageIcon(Const.PROJECT_PATH+"icon_calendar.png"));
+			newJMenuItem("rendeloBeosztas", "Rendelő beosztás", "", true, new ImageIcon(Const.PROJECT_PATH+"icon_calendar.png"));
 			newJMenuItem("penztar", "Betegelőjegyzés (időpontkiadás)", "", false);
-			newJMenuItem("penztar", "Laborvizsgálat árszámító", "", false, new ImageIcon(Const.PROJECT_PATH+"icon_lab.png"));
+			newJMenuItem("penztar", "Laborvizsgálat árszámító", "", true, new ImageIcon(Const.PROJECT_PATH+"icon_lab.png"));
 			newJMenuItem("penztar", "WebLabor", "", false);
 		/*newJMenu("WebLabor (IN PROGRESS)", KeyEvent.VK_F, "Lelet menü");
 			newJMenuItem("ujOrvos", "Új orvos regisztrálása", "");
@@ -132,13 +129,13 @@ public class MainWindow implements ActionListener{
 		calendar.addActionListener(this);
 		calendar.setActionCommand("rendeloBeosztas");
 		calendar.setFocusable(false);
-		calendar.setEnabled(false);
+		calendar.setEnabled(true);
 		
 		JButton lab = new JButton("Laborvizsgálatok", new ImageIcon(Const.PROJECT_PATH+"icon_lab.png"));
 		lab.addActionListener(this);
 		lab.setActionCommand("penztar");
 		lab.setFocusable(false);
-		lab.setEnabled(false);
+		lab.setEnabled(true);
 		
 		mainCenterPanel.add(centrumLab);
 		mainCenterPanel.add(calendar);
@@ -204,7 +201,7 @@ public class MainWindow implements ActionListener{
 		dao = new DAO();
 		
 		labCashWindow = new LabCashWindow(dao);
-		doctorScheduleWindow = new DoctorScheduleWindow(mysql);
+		doctorScheduleWindow = new DoctorScheduleWindow(dao);
 		c = new CentrumLab();
 		
 		downloadDatas();
@@ -218,6 +215,7 @@ public class MainWindow implements ActionListener{
 	        		if (mysql.isConnection()){	        			
 	        			dao.init(mysql);
 	        			labCashWindow.init();
+	        			doctorScheduleWindow.init();
 		        	} 		
 	        	}	        		
 	        }	        		        	 
