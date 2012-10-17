@@ -65,10 +65,10 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 	
 	//Window dimensions & options
 	private static String title = "Labor fizetés összesítő";
-	private static int preferredHeight = 0;
-	private static int preferredWidth = 0;
-	private static int height = 0;
-	private static int width = 0;
+	private static int preferredHeight = 800;
+	private static int preferredWidth = 1200;
+	private static int height = 800;
+	private static int width = 1200;
 	private static int locationX = 0;
 	private static int locationY = 0;
 	private static boolean resizable = true;
@@ -127,22 +127,26 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 			
 		table.setFocusable(false);
 		table.setRowSelectionAllowed(false);
+		table.setEnabled(false);
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		
 		TableColumn col0 = table.getColumnModel().getColumn(0);
-		col0.setPreferredWidth((int)((width-listaWidth)*0.1));
+		col0.setPreferredWidth((int)((width-listaWidth)*0.05));
 		
 		TableColumn col1 = table.getColumnModel().getColumn(1);
-		col1.setPreferredWidth((int)((width-listaWidth)*0.3));
+		col1.setPreferredWidth((int)((width-listaWidth)*0.25));
 		
 		TableColumn col2 = table.getColumnModel().getColumn(2);
-		col2.setPreferredWidth((int)((width-listaWidth)*0.4));
+		col2.setPreferredWidth((int)((width-listaWidth)*0.25));
 		
 		TableColumn col3 = table.getColumnModel().getColumn(3);
-		col3.setPreferredWidth((int)((width-listaWidth)*0.1));
+		col3.setPreferredWidth((int)((width-listaWidth)*0.35));
 		
 		TableColumn col4 = table.getColumnModel().getColumn(4);
-		col4.setPreferredWidth((int)((width-listaWidth)*0.1));
+		col4.setPreferredWidth((int)((width-listaWidth)*0.05));
+		
+		TableColumn col5 = table.getColumnModel().getColumn(4);
+		col5.setPreferredWidth((int)((width-listaWidth)*0.05));
 		
 		TableColumn tcolumnas = table.getColumnModel().getColumn(0);
 		tcolumnas.setCellRenderer(table.getDefaultRenderer(Boolean.class));
@@ -207,10 +211,11 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 			 */
 			private static final long serialVersionUID = 4455267473892614053L;
 			String[] columnNames = 
-				   {"Valasztott",
+				   {"",
 	                "Csoport",
 	                "Nev",
-	                "Aranyklinika Ar",
+	                "Megjegyzes",
+	                "AranyAr",
 	                ""};
 
 			@Override
@@ -237,8 +242,10 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 				} else if (col==2){
 					return dao.getLabor().get(row);
 				} else if (col==3){
-					return ((Labor)this.getValueAt(row, col-1)).getAranyklinikaAr();
+					return ((Labor)this.getValueAt(row, col-1)).getMegj();
 				} else if (col==4){
+					return ((Labor)this.getValueAt(row, col-2)).getAranyklinikaAr();
+				} else if (col==5){
 					return "Edit";
 				}
 				return "Error";
@@ -253,7 +260,7 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 			@Override
 			public int getColumnCount() {
 				// TODO Auto-generated method stub
-				return 5;
+				return 6;
 			}
 			
 		};		      
