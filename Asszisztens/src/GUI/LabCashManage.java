@@ -66,18 +66,6 @@ public class LabCashManage extends BaseWindow{
 	
 	public void makeList(){
 		listModel.clear();
-		listModel.addElement(
-				"<html>" +
-					"<table><tr style='background-color: black; color: white;'>" +
-						"<td style='width:300px;'><b>Név1</b></td>" +
-						"<td style='width:150px;'><b>Név2</b></td>" +
-						"<td style='width:50px;'><b>Idő</b></td>" +
-						"<td style='width:80px;'><b>KlinikaÁr</b></td>" +
-						"<td style='width:80px;'><b>CentrumLabÁr</b></td>" +
-						"<td style='width:80px;'><b>AranyÁr</b></td>" +
-						"<td style='width:60px;'><b>Állapot</b></td>" +
-					"</tr></table>" +
-				"</html>");
 		Iterator<Labor> it = dao.getLabor().iterator();
 		
 		while (it.hasNext()){

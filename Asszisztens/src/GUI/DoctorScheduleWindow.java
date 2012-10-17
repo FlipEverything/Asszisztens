@@ -50,6 +50,7 @@ public class DoctorScheduleWindow extends BaseWindow{
 	private int topSizeScroll = 100;
 	
 	private JPanel colors;
+	private JScrollPane bottom;
 	
 	public DoctorScheduleWindow(DAO dao){
 		super(0, 0, true, false, "Rendelő beosztás - Orvosok", 0, 0, JFrame.DISPOSE_ON_CLOSE, false);
@@ -74,7 +75,7 @@ public class DoctorScheduleWindow extends BaseWindow{
 		JPanel topPanel = new JPanel(new FlowLayout());
 		//JPanel bottomPanel = new JPanel(new GridLayout());
 		
-		JScrollPane bottom = new JScrollPane(calendar);
+		bottom = new JScrollPane(calendar);
 		
 		topPanel.setPreferredSize(new Dimension(getWidth(),topSize));
 		bottom.setPreferredSize(new Dimension(getWidth(),getHeight()-topSizeScroll));
@@ -94,10 +95,14 @@ public class DoctorScheduleWindow extends BaseWindow{
 			public void actionPerformed(ActionEvent arg0) {
 				int id = szobaLista.getSelectedIndex();
 				if (id>0){
+					bottom.setVisible(true);
 					calendar.setVisible(true);
 				} else {
-					calendar.setVisible(false);
+					//bottom.setVisible(false);
+					//calendar.setVisible(false);
 				}
+				bottom.validate();
+				bottom.repaint();
 				calendar.validate();
 				calendar.repaint();
 				generateColorsPanel();
@@ -114,10 +119,14 @@ public class DoctorScheduleWindow extends BaseWindow{
 			public void actionPerformed(ActionEvent arg0) {
 				int id = szobaLista.getSelectedIndex();
 				if (id>0){
+					bottom.setVisible(true);
 					calendar.setVisible(true);
 				} else {
-					calendar.setVisible(false);
+					//bottom.setVisible(false);
+					//calendar.setVisible(false);
 				}
+				bottom.validate();
+				bottom.repaint();
 				calendar.validate();
 				calendar.repaint();
 				generateColorsPanel();
@@ -126,7 +135,6 @@ public class DoctorScheduleWindow extends BaseWindow{
 			}
 		});
 		
-		calendar.setVisible(false);
 		calendar.setFocusable(false);
 		calendar.setRowSelectionAllowed(false);
 		
@@ -354,8 +362,8 @@ public class DoctorScheduleWindow extends BaseWindow{
 		} else if (cmd.equals("delete")){
 			torolIdopont.setVisible(true);
 		} else if (cmd.equals("select")){
-			calendar.validate();
-			calendar.repaint();
+			bottom.validate();
+			bottom.repaint();
 		}
 	}
 	

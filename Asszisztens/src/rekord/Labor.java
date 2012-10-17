@@ -98,17 +98,7 @@ public class Labor {
 	
 	@Override
 	public String toString() {
-		return "<html>" +
-						"<table><tr>" +
-							"<td style='width:300px;'>"+nev1+"</td>" +
-							"<td style='width:150px;'>"+nev2+"</td>" +
-							"<td style='width:50px;'>"+ido+"</td>" +
-							"<td style='width:80px;'>"+laborAr+"</td>" +
-							"<td style='width:80px;'>"+partnerAr+"</td>" +
-							"<td style='width:80px;'>"+aranyklinikaAr+"</td>" +
-							"<td style='width:60px;'>"+allapot+"</td>" +
-						"</tr></table>" +
-					"</html>";
+		return nev1 + " " + ((!nev2.equals("")) ? " ["+nev2+"]" : "");
 	}
 
 	public String getAllapot() {

@@ -15,6 +15,7 @@ import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import javax.swing.AbstractCellEditor;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -24,12 +25,18 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableColumn;
 
 import database.DAO;
 import rekord.Csoport;
@@ -79,6 +86,9 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 	private DAO dao;
 	private ArrayList<JCheckBox> checkBoxLista;
 	private ArrayList<Labor> valasztott;
+	
+	
+	private JTable table;
 
 	
 	public LabCashWindow(DAO dao){
@@ -114,6 +124,29 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 		
 		felso.setLayout(new BoxLayout(felso, BoxLayout.PAGE_AXIS));
 		felso.setSize(new Dimension(width-listaWidth, height-alsoHeight));
+			
+		table.setFocusable(false);
+		table.setRowSelectionAllowed(false);
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		
+		TableColumn col0 = table.getColumnModel().getColumn(0);
+		col0.setPreferredWidth((int)((width-listaWidth)*0.1));
+		
+		TableColumn col1 = table.getColumnModel().getColumn(1);
+		col1.setPreferredWidth((int)((width-listaWidth)*0.3));
+		
+		TableColumn col2 = table.getColumnModel().getColumn(2);
+		col2.setPreferredWidth((int)((width-listaWidth)*0.4));
+		
+		TableColumn col3 = table.getColumnModel().getColumn(3);
+		col3.setPreferredWidth((int)((width-listaWidth)*0.1));
+		
+		TableColumn col4 = table.getColumnModel().getColumn(4);
+		col4.setPreferredWidth((int)((width-listaWidth)*0.1));
+		
+		TableColumn tcolumnas = table.getColumnModel().getColumn(0);
+		tcolumnas.setCellRenderer(table.getDefaultRenderer(Boolean.class));
+		tcolumnas.setCellEditor(table.getDefaultEditor(Boolean.class));
 		
 		felsoScroll.setSize(width-listaWidth, height-alsoHeight);
 		felsoScroll.setPreferredSize(new Dimension(width-listaWidth, height-alsoHeight));
@@ -165,7 +198,68 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 		valasztott = new ArrayList<Labor>();
 		checkBoxLista = new ArrayList<JCheckBox>();
 		felso = new JPanel();
-		felsoScroll = new JScrollPane(felso);
+		
+		
+		DefaultTableModel tableModel = new DefaultTableModel() {
+			
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 4455267473892614053L;
+			String[] columnNames = 
+				   {"Valasztott",
+	                "Csoport",
+	                "Nev",
+	                "Aranyklinika Ar",
+	                ""};
+
+			@Override
+		    public String getColumnName(int col) {
+		        return columnNames[col];
+		    }
+			
+			
+			@Override
+			public Object getValueAt(int row, int col) {
+				if (col==0){
+				   return new Boolean("false"); 	   
+				} else if (col==1){
+					Iterator<Csoport> it = dao.getLaborCsoport().iterator();
+					String nev = null;
+					while (it.hasNext()){
+						Csoport cs = it.next();
+						if (cs.getId()==((Labor)this.getValueAt(row, col+1)).getCsoport()){
+							nev = cs.getNev();
+							break;
+						}
+					}
+					return nev;
+				} else if (col==2){
+					return dao.getLabor().get(row);
+				} else if (col==3){
+					return ((Labor)this.getValueAt(row, col-1)).getAranyklinikaAr();
+				} else if (col==4){
+					return "Edit";
+				}
+				return "Error";
+			}
+			
+			@Override
+			public int getRowCount() {
+				// TODO Auto-generated method stub
+				return dao.getLabor().size();
+			}
+			
+			@Override
+			public int getColumnCount() {
+				// TODO Auto-generated method stub
+				return 5;
+			}
+			
+		};		      
+		
+		table = new JTable(tableModel);
+		felsoScroll = new JScrollPane(table);
 		also = new JPanel();
 		lista = new JPanel();
 		gombok = new JPanel();
@@ -373,7 +467,7 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 	@Override
 	public void focusGained(FocusEvent arg0) {
 		// TODO Auto-generated method stub
-		
+		System.out.println("mama");
 	}
 
 	@Override
@@ -381,7 +475,5 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 		// TODO Auto-generated method stub
 		
 	}
-
-
 
 }
