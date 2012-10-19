@@ -46,6 +46,21 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 	 * 
 	 */
 	private static final long serialVersionUID = -1229457295479031303L;
+	
+	public static final int CHECHBOX = 0;
+	public static final int CATEGORY = 2;
+	public static final int LAB_OBJECT = 1;
+	public static final int COMMENT = 3;
+	public static final int PRICE = 4;
+	
+	public static final int COLUMN_COUNT = 5;
+	
+	public static final String[] columnNames = 	 {"",
+										         "Név",
+										         "Kategória",
+										         "Megjegyzés",
+										         "Ár"};
+	
 	//GUI Components
 	private JScrollPane felsoScroll;
 	private JPanel felso;
@@ -61,10 +76,8 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 	
 	//Window dimensions & options
 	private static String title = "Labor fizetés összesítő";
-	private static int height = 800;
+	private static int height = BaseWindow.screenHeight-100;
 	private static int width = 1200;
-	private static int locationX = 0;
-	private static int locationY = 0;
 	private static boolean resizable = true;
 	private static boolean visible = false;
 	private static int defaultCloseOperation = JFrame.DISPOSE_ON_CLOSE;
@@ -82,12 +95,10 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 	private int selectedCount = 0;
 	private DefaultRowSorter<DefaultTableModel, Integer> sorter;
 	private JButton report;
-	
-	public static final int COLUMN_COUNT = 5;
+	private JButton sumFilter;
 
-	
 	public LabCashWindow(DAO dao){
-		super(width, height, resizable, visible, title, locationX, locationY, defaultCloseOperation, exit);
+		super(width, height, resizable, visible, title, 0, 0, defaultCloseOperation, exit);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(Const.PROJECT_PATH+"icon_lab.png"));
 
 		this.dao = dao;
@@ -108,6 +119,7 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 		newItem = new JButton("Új laborvizsgálat", new ImageIcon(Const.PROJECT_PATH+"icon_new.png"));
 		manageItem = new JButton("Laborvizsgálatok kezelése", new ImageIcon(Const.PROJECT_PATH+"icon_edit.png"));
 		report = new JButton("Összesítő", new ImageIcon(Const.PROJECT_PATH+"icon_report.png"));
+		sumFilter = new JButton("Csak a kiválasztottak mutatása", new ImageIcon(Const.PROJECT_PATH+"icon_report.png"));
 		felso = new JPanel();
 	
 		DefaultTableModel tableModel = new DefaultTableModel() {
@@ -116,12 +128,7 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 			 * 
 			 */
 			private static final long serialVersionUID = 4455267473892614053L;
-			String[] columnNames = 
-				   {"",
-	                "Csoport",
-	                "Név",
-	                "Megjegyzés",
-	                "Ár"};
+
 
 			@Override
 		    public String getColumnName(int col) {
@@ -131,23 +138,23 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 			
 			@Override
 			public Object getValueAt(int row, int col) {
-				if (col==0){
-				   return ((Labor)this.getValueAt(row, col+2)).getSelected();  
-				} else if (col==1){
+				if (col==CHECHBOX){
+				   return ((Labor)this.getValueAt(row, LAB_OBJECT)).getSelected();  
+				} else if (col==CATEGORY){
 					Csoport eredmeny = null;
 					Iterator<Csoport> it = dao.getLaborCsoport().iterator();
 					while (it.hasNext()){
 						Csoport cs = it.next();
-						if (cs.getId()==((Labor)this.getValueAt(row, col+1)).getCsoport()){
+						if (cs.getId()==((Labor)this.getValueAt(row, LAB_OBJECT)).getCsoport()){
 							eredmeny = cs;
 							break;
 						}
 					}
 					return eredmeny;
-				} else if (col==2){
+				} else if (col==LAB_OBJECT){
 					return dao.getLabor().get(row);
-				} else if (col==3){
-					String megj = ((Labor)this.getValueAt(row, col-1)).getMegj();
+				} else if (col==COMMENT){
+					String megj = ((Labor)this.getValueAt(row, LAB_OBJECT)).getMegj();
 					int lineBreak = 65;
 					if (megj.length()>lineBreak){
 						for (int i=lineBreak; i<megj.length(); i++){
@@ -158,8 +165,8 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 						}
 					}
 					return "<html>"+megj+"</html>";
-				} else if (col==4){
-					return ((Labor)this.getValueAt(row, col-2)).getAranyklinikaAr();
+				} else if (col==PRICE){
+					return ((Labor)this.getValueAt(row, LAB_OBJECT)).getAranyklinikaAr();
 				}
 				return "Error";
 			}
@@ -168,8 +175,8 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 			public void setValueAt(Object aValue, int row, int column) {
 				// TODO Auto-generated method stub
 				if (column==0){
-					((Labor)this.getValueAt(row, column+2)).setSelected(!((Labor)this.getValueAt(row, column+2)).getSelected());
-					Labor l = ((Labor)this.getValueAt(row, column+2));
+					((Labor)this.getValueAt(row, LAB_OBJECT)).setSelected(!((Labor)this.getValueAt(row, LAB_OBJECT)).getSelected());
+					Labor l = ((Labor)this.getValueAt(row, LAB_OBJECT));
 					if (l.getAlapdij().equals("nem")){
 						if (l.getSelected()==false){
 							setFizetendo(getFizetendo()-l.getAranyklinikaAr());
@@ -185,6 +192,8 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 					} else {
 						deselectAll.setEnabled(false);
 					}
+					table.revalidate();
+					table.repaint();
 				} else {
 					super.setValueAt(aValue, row, column);
 				}
@@ -205,7 +214,7 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 			
 			@Override
 			public Class<?> getColumnClass(int columnIndex) {
-				if (columnIndex==0)
+				if (columnIndex==CHECHBOX)
 					return Boolean.class;
 				else
 					return super.getColumnClass(columnIndex);
@@ -214,8 +223,8 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 			@Override
 			public boolean isCellEditable(int row, int col) {
 				// TODO Auto-generated method stub
-				if (col==0)
-					if (((Labor)this.getValueAt(row, col+2)).getAlapdij().equals("nem") && ((Labor)this.getValueAt(row, col+2)).getAllapot().equals("aktiv"))
+				if (col==CHECHBOX)
+					if (((Labor)this.getValueAt(row, LAB_OBJECT)).getAlapdij().equals("nem") && ((Labor)this.getValueAt(row, LAB_OBJECT)).getAllapot().equals("aktiv"))
 						return true;
 					else
 						return false;
@@ -243,7 +252,7 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 			         JTable target = (JTable)e.getSource();
 			         int row = target.getSelectedRow();
 			         int column = target.getSelectedColumn();
-				         if (column==2){
+				         if (column==LAB_OBJECT){
 				        	 deselectAll();
 				        	 int view = table.convertRowIndexToModel(row);
 				      	   int actualRow = 0;
@@ -261,8 +270,8 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 		int[] widthk = new int[COLUMN_COUNT];
 		
 		widthk[0] = (int)((width)*0.025);
-		widthk[1] = (int)((width)*0.25);
-		widthk[2] = (int)((width)*0.34);
+		widthk[1] = (int)((width)*0.35);
+		widthk[2] = (int)((width)*0.24);
 		widthk[3] = (int)((width)*0.3);
 		widthk[4] = (int)((width)*0.05);
 		 
@@ -288,6 +297,9 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 		report.addActionListener(this);
 		report.setFocusable(false);
 		
+		sumFilter.addActionListener(this);
+		sumFilter.setFocusable(false);
+		
 		felso.setLayout(new BoxLayout(felso, BoxLayout.PAGE_AXIS));
 		felso.setSize(new Dimension(width, height-alsoHeight));
 		
@@ -303,6 +315,7 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 		gombok.add(category);
 		gombok.add(newItem);
 		gombok.add(report);
+		gombok.add(sumFilter);
 		//gombok.add(manageItem);
 			
 		kereses.setFont(new Font("SansSerif", Font.PLAIN, 20));
@@ -340,21 +353,15 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 	}
 	
 	public void init(){
-		refreshGUI();
-		
+		setFizetendo(getAlapdij());	
 	}
-	
-	public void refreshGUI(){			
-			setFizetendo(getAlapdij());
-	}
-	
 	
 	public void beallitKasszaVegosszeg(int osszeg){
 		kasszaVegosszeg.setText("<html><div style='text-align: right;'><span style='font-size: 20px; font-weight: bold;'>Fizetendő:</span> <span style='font-size: 30px; font-weight: bold;'>"+osszeg+"&nbsp;HUF&nbsp;</span></div></html>");
 	}
 	
 	public void refresh(){
-		repaint();
+		//repaint();
 		SwingUtilities.updateComponentTreeUI(this);
 	}
 
@@ -370,6 +377,15 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 			report();
 		} else if (e.getSource()==newItem){
 			new LabCashItem(dao);
+		} else if (e.getSource()==sumFilter){
+			if (kereses.getText().equals("sum")){
+				kereses.setText("");
+				sorter.setRowFilter(null);
+				table.repaint();
+			} else {
+				kereses.setText("sum");
+				table.repaint();
+			}
 		}
 	}
 	
@@ -415,15 +431,122 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 	 * Called by the DocumentListener
 	 * */
 	public void filter(){
-		List<RowFilter<Object,Object>> rfs = new ArrayList<RowFilter<Object,Object>>(2);
-			rfs.add(RowFilter.regexFilter("(?i)"+kereses.getText(), 1));
-			rfs.add(RowFilter.regexFilter("(?i)"+kereses.getText(), 2));
+		String k = kereses.getText();
+		if (k.equals("")){
+			sorter.setRowFilter(null);
+		} else if (k.equals("sum")){
+			List<RowFilter<Object,Object>> rfs = new ArrayList<RowFilter<Object,Object>>(COLUMN_COUNT);
+			rfs.add(RowFilter.regexFilter("true", CHECHBOX));
 		
-		RowFilter<DefaultTableModel, Object> rf = RowFilter.orFilter(rfs);
-	    sorter.setRowFilter(rf);
+			RowFilter<DefaultTableModel, Object> rf = RowFilter.orFilter(rfs);
+		    sorter.setRowFilter(rf);
+		} else {
+			List<RowFilter<Object,Object>> rfs = new ArrayList<RowFilter<Object,Object>>(COLUMN_COUNT);
+			rfs.add(RowFilter.regexFilter("(?i)"+kereses.getText(), CATEGORY));
+			rfs.add(RowFilter.regexFilter("(?i)"+kereses.getText(), LAB_OBJECT));
+		
+			RowFilter<DefaultTableModel, Object> rf = RowFilter.orFilter(rfs);
+		    sorter.setRowFilter(rf);
+		}
+		
 	    
 	    table.revalidate();
 	    table.repaint();
+	}
+	
+	class ColorColumnRenderer extends DefaultTableCellRenderer {
+
+		private static final long serialVersionUID = -5231478102825612264L;
+		
+		Color claret = new Color(112, 29, 37);
+		Color gold = new Color(239, 205, 108);
+		Color extraLightGray = new Color(233, 233, 233);
+	
+		float fontSize;
+		int fontStyle;
+	
+		private JCheckBox box = new JCheckBox();
+		private Color backColor;
+		private Color foreColor;
+	
+		private Labor l;
+	
+		public ColorColumnRenderer() {
+			super(); 
+		}
+	
+		public Component getTableCellRendererComponent
+		(JTable table, Object value, boolean isSelected,
+				boolean hasFocus, int row, int column) 
+		{
+	
+			int view = table.convertRowIndexToModel(row);
+			int actualRow = 0;
+			if (view != row)
+				actualRow = view;
+			else
+				actualRow = row;
+	
+			boolean selected = (Boolean)(table.getModel().getValueAt(actualRow, CHECHBOX));
+			l = ((Labor)(table.getModel().getValueAt(actualRow, LAB_OBJECT)));
+	
+			Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+	
+			if (selected){
+				backColor = claret;
+				foreColor = gold;
+				fontSize = 13f;
+				fontStyle = Font.BOLD;
+			} else {
+				if (row%2==0){
+					backColor = Color.white;
+					foreColor = Color.black;
+				} else {
+					backColor = extraLightGray;
+					foreColor = Color.black;
+				}
+				fontSize = 12f;
+				if (column==LAB_OBJECT){
+					fontStyle = Font.BOLD;
+				} else {
+					fontStyle = Font.PLAIN;
+				}
+			}
+	
+			if (l.getAllapot().equals("passziv")){
+				if (column==CHECHBOX){
+					backColor = Color.LIGHT_GRAY;
+					foreColor = Color.black;
+					
+				}
+				fontStyle = Font.PLAIN;
+	
+			} else {
+				
+			}
+				
+	
+			cell.setFont( cell.getFont().deriveFont(fontSize).deriveFont(fontStyle) );
+			cell.setBackground( backColor );
+			cell.setForeground( foreColor );
+	
+	
+			if (column==CHECHBOX){
+				if (l.getAlapdij().equals("igen")){
+					backColor = Color.LIGHT_GRAY;
+					foreColor = Color.black;
+				}
+				box.setBackground(backColor);
+				box.setForeground(foreColor);
+				box.setHorizontalAlignment(SwingConstants.CENTER); 
+				box.setSelected((Boolean)(table.getModel().getValueAt(actualRow, CHECHBOX)));
+				return box;
+			} else if (column==PRICE){
+				((JLabel) cell).setHorizontalAlignment(SwingConstants.CENTER);  
+			}
+			
+			return cell;
+		}
 	}
 
 	
@@ -455,97 +578,4 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 	}
 
 	
-	}
-
-class ColorColumnRenderer extends DefaultTableCellRenderer 
-{
-
-/**
-	 * 
-	 */
-	private static final long serialVersionUID = -5231478102825612264L;
-Color selectedColor = new Color(112, 29, 37);
-   Color selectedForeColor = new Color(239, 205, 108);
-   float selectedFontSize = 13f;
-   float selectedNameSize = 14f;
-   
-   Color unSelectedForeColor;
-   Color unSelectedColor;
-   float unSelectedFontSize = 11f;
-   float unSelectedNameSize = 12f;
-   
-   int fontStyle;
-   
-   private JCheckBox box = new JCheckBox();
- 	
-   public ColorColumnRenderer() {
-      super(); 
-   }
-  	
-   public Component getTableCellRendererComponent
-	    (JTable table, Object value, boolean isSelected,
-	     boolean hasFocus, int row, int column) 
-   {
-	  
-	   int view = table.convertRowIndexToModel(row);
-	   int actualRow = 0;
-	  if (view != row){
-		  actualRow = view;
-	  } else {
-		  actualRow = row;
-	  }
-	   
-      Component cell = super.getTableCellRendererComponent
-         (table, value, isSelected, hasFocus, row, column);
-        
-      //System.out.println(row+" "+view);
-      
-      if (row%2==0){
-    	  unSelectedColor = Color.white;
-    	  unSelectedForeColor = Color.black;
-      } else {
-    	  unSelectedColor = new Color(233, 233, 233);
-    	  unSelectedForeColor = Color.black;
-      }
-      
-      if (column==0){
-    	  box.setHorizontalAlignment(SwingConstants.CENTER);  
-    	  box.setBackground( Color.white);  
-    	  box.setSelected((Boolean)(table.getModel().getValueAt(actualRow, 0)));
-      	  return box;
-      } else {
-    	  if (column==4){
-    		  ((JLabel) cell).setHorizontalAlignment(SwingConstants.CENTER);  
-    	  }
-    	  boolean firstCell = (Boolean)(table.getModel().getValueAt(actualRow, 0));
-
-          if (firstCell){
-        	  if (column==2){
-        		  cell.setFont( cell.getFont().deriveFont(selectedNameSize).deriveFont(Font.BOLD) );
-        	  } else {
-        		  cell.setFont( cell.getFont().deriveFont(selectedFontSize).deriveFont(Font.BOLD) );
-        	  }
-        	  cell.setBackground( selectedColor );
-              cell.setForeground( selectedForeColor );
-              
-          } else {
-        	  if (column==2){
-        		  if (((Labor)(table.getModel().getValueAt(actualRow, 2))).getAllapot().equals("aktiv"))
-        			  cell.setFont( cell.getFont().deriveFont(unSelectedNameSize).deriveFont(Font.BOLD) );
-        		  else
-        			  cell.setFont( cell.getFont().deriveFont(unSelectedFontSize).deriveFont(Font.PLAIN) );
-        	  } else {
-        		  cell.setFont( cell.getFont().deriveFont(unSelectedFontSize).deriveFont(Font.PLAIN) );  
-        	  }
-        	  cell.setBackground( unSelectedColor );
-        	  cell.setForeground( unSelectedForeColor );
-        	  
-          }        
-      }
-      table.revalidate();
-      table.repaint();
-      return cell;  
-      
-      
-   }
-}
+}	
