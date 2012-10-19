@@ -105,7 +105,7 @@ public class DBConnect {
 								try {
 									sleep(10000);
 									exec("SELECT 1");
-									System.out.println("[INFO] Van kapcsolat");
+									//System.out.println("[INFO] Van kapcsolat");
 								} catch (InterruptedException e) {
 									// TODO Auto-generated catch block
 									e.printStackTrace();

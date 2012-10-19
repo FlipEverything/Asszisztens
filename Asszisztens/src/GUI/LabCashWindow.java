@@ -8,16 +8,14 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
-import javax.swing.AbstractCellEditor;
-import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultRowSorter;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -27,16 +25,15 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.RowFilter;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.border.Border;
-import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableRowSorter;
 
 import database.DAO;
 import rekord.Csoport;
@@ -44,7 +41,7 @@ import rekord.Labor;
 import tools.Const;
 
 
-public class LabCashWindow extends BaseWindow implements ItemListener, ActionListener, DocumentListener, FocusListener {
+public class LabCashWindow extends BaseWindow implements  ActionListener, DocumentListener {
 	/**
 	 * 
 	 */
@@ -53,7 +50,6 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 	private JScrollPane felsoScroll;
 	private JPanel felso;
 	private JPanel also;
-	private JPanel lista;
 	private JPanel gombok;
 	private JPanel keresoPanel;
 	private JLabel kasszaVegosszeg;
@@ -65,38 +61,34 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 	
 	//Window dimensions & options
 	private static String title = "Labor fizetés összesítő";
-	private static int preferredHeight = 0;
-	private static int preferredWidth = 0;
-	private static int height = 0;
-	private static int width = 0;
+	private static int height = 800;
+	private static int width = 1200;
 	private static int locationX = 0;
 	private static int locationY = 0;
 	private static boolean resizable = true;
 	private static boolean visible = false;
 	private static int defaultCloseOperation = JFrame.DISPOSE_ON_CLOSE;
 	private static boolean exit = false;
-	private int listaWidth = 350;
 	private int alsoHeight = 100;
 	private int buttonHeight = 30;
 	private int searchHeight = 30;
-	private int componentWidth; //offset
 	
 	//Database connection
 	private int fizetendo;
 	private DAO dao;
-	private ArrayList<JCheckBox> checkBoxLista;
-	private ArrayList<Labor> valasztott;
 	
 	
 	private JTable table;
+	private int selectedCount = 0;
+	private DefaultRowSorter<DefaultTableModel, Integer> sorter;
+	
+	public static final int COLUMN_COUNT = 5;
 
 	
 	public LabCashWindow(DAO dao){
-		super(preferredWidth, preferredHeight, resizable, visible, title, locationX, locationY, defaultCloseOperation, exit);
+		super(width, height, resizable, visible, title, locationX, locationY, defaultCloseOperation, exit);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(Const.PROJECT_PATH+"icon_lab.png"));
-		height = getHeight();
-		width = getWidth();
-		
+
 		this.dao = dao;
 		this.fizetendo = 0;	
 		
@@ -105,10 +97,171 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 	}
 	
 	public void createWindowContent(){
-		//Create main objects
-		initComponents();
+		also = new JPanel();
+		gombok = new JPanel();
+		kereses = new JTextField();
+		keresoPanel = new JPanel();
+		kasszaVegosszeg = new JLabel();
+		deselectAll = new JButton("Összes kijelölés megszüntetése", new ImageIcon(Const.PROJECT_PATH+"icon_cancel.png"));
+		category = new JButton("Kategóriák kezelése", new ImageIcon(Const.PROJECT_PATH+"icon_category.png"));
+		newItem = new JButton("Új laborvizsgálat", new ImageIcon(Const.PROJECT_PATH+"icon_new.png"));
+		manageItem = new JButton("Laborvizsgálatok kezelése", new ImageIcon(Const.PROJECT_PATH+"icon_edit.png"));
+		felso = new JPanel();
+	
+		DefaultTableModel tableModel = new DefaultTableModel() {
+			
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 4455267473892614053L;
+			String[] columnNames = 
+				   {"",
+	                "Csoport",
+	                "Név",
+	                "Megjegyzés",
+	                "Ár"};
+
+			@Override
+		    public String getColumnName(int col) {
+		        return columnNames[col];
+		    }
+			
+			
+			@Override
+			public Object getValueAt(int row, int col) {
+				if (col==0){
+				   return ((Labor)this.getValueAt(row, col+2)).getSelected();  
+				} else if (col==1){
+					Csoport eredmeny = null;
+					Iterator<Csoport> it = dao.getLaborCsoport().iterator();
+					while (it.hasNext()){
+						Csoport cs = it.next();
+						if (cs.getId()==((Labor)this.getValueAt(row, col+1)).getCsoport()){
+							eredmeny = cs;
+							break;
+						}
+					}
+					return eredmeny;
+				} else if (col==2){
+					return dao.getLabor().get(row);
+				} else if (col==3){
+					String megj = ((Labor)this.getValueAt(row, col-1)).getMegj();
+					int lineBreak = 65;
+					if (megj.length()>lineBreak){
+						for (int i=lineBreak; i<megj.length(); i++){
+							if (megj.substring(i, i+1).equals(" ")){
+								megj = megj.substring(0, i)+megj.substring(i, i+1).replace(" ", "<br/>")+megj.substring(i+1, megj.length());
+								break;
+							}
+						}
+					}
+					return "<html>"+megj+"</html>";
+				} else if (col==4){
+					return ((Labor)this.getValueAt(row, col-2)).getAranyklinikaAr();
+				}
+				return "Error";
+			}
+			
+			@Override
+			public void setValueAt(Object aValue, int row, int column) {
+				// TODO Auto-generated method stub
+				if (column==0){
+					((Labor)this.getValueAt(row, column+2)).setSelected(!((Labor)this.getValueAt(row, column+2)).getSelected());
+					Labor l = ((Labor)this.getValueAt(row, column+2));
+					if (l.getAlapdij().equals("nem")){
+						if (l.getSelected()==false){
+							setFizetendo(getFizetendo()-l.getAranyklinikaAr());
+							selectedCount--;
+						}else{
+							setFizetendo(getFizetendo()+l.getAranyklinikaAr());
+							selectedCount++;
+						}
+					}
+					
+					if (selectedCount>0){
+						deselectAll.setEnabled(true);
+					} else {
+						deselectAll.setEnabled(false);
+					}
+				} else {
+					super.setValueAt(aValue, row, column);
+				}
+				
+			}
+			
+			@Override
+			public int getRowCount() {
+				// TODO Auto-generated method stub
+				return dao.getLabor().size();
+			}
+			
+			@Override
+			public int getColumnCount() {
+				// TODO Auto-generated method stub
+				return COLUMN_COUNT;
+			}
+			
+			@Override
+			public Class<?> getColumnClass(int columnIndex) {
+				if (columnIndex==0)
+					return Boolean.class;
+				else
+					return super.getColumnClass(columnIndex);
+			}
+			
+			@Override
+			public boolean isCellEditable(int row, int col) {
+				// TODO Auto-generated method stub
+				if (col==0)
+					if (((Labor)this.getValueAt(row, col+2)).getAlapdij().equals("nem"))
+						return true;
+					else
+						return false;
+				else 
+					return false;
+			}
+			
+		};		
 		
-		componentWidth = (int)(width * 0.25);	
+		sorter = new TableRowSorter<DefaultTableModel>(tableModel);
+		
+		table = new JTable(tableModel);
+		felsoScroll = new JScrollPane(table);
+		
+		table.setRowSorter(sorter);
+		table.setFocusable(false);
+		table.setRowSelectionAllowed(false);
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		table.setRowHeight(30);
+		
+		table.addMouseListener(new MouseAdapter() {
+			   public void mouseClicked(MouseEvent e) {
+			      if (e.getClickCount() == 2) {
+			         JTable target = (JTable)e.getSource();
+			         int row = target.getSelectedRow();
+			         int column = target.getSelectedColumn();
+				         if (column==2){
+				        	 deselectAll();
+				        	 new LabCashItem(dao, (Labor)table.getModel().getValueAt(row, column)); 
+				         }
+			         }
+			   }
+			});
+		
+		int[] widthk = new int[COLUMN_COUNT];
+		
+		widthk[0] = (int)((width)*0.025);
+		widthk[1] = (int)((width)*0.25);
+		widthk[2] = (int)((width)*0.34);
+		widthk[3] = (int)((width)*0.3);
+		widthk[4] = (int)((width)*0.05);
+		 
+		for (int i=0;  i<COLUMN_COUNT; i++){
+			TableColumn tm = table.getColumnModel().getColumn(i);
+		    tm.setCellRenderer(new ColorColumnRenderer());
+		    tm.setPreferredWidth(widthk[i]);
+		}
+		
 		deselectAll.addActionListener(this);
 		deselectAll.setFocusable(false);
 		deselectAll.setEnabled(false);
@@ -123,56 +276,20 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 		manageItem.setFocusable(false);
 		
 		felso.setLayout(new BoxLayout(felso, BoxLayout.PAGE_AXIS));
-		felso.setSize(new Dimension(width-listaWidth, height-alsoHeight));
-			
-		table.setFocusable(false);
-		table.setRowSelectionAllowed(false);
-		table.setEnabled(false);
-		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		felso.setSize(new Dimension(width, height-alsoHeight));
 		
-		TableColumn col0 = table.getColumnModel().getColumn(0);
-		col0.setPreferredWidth((int)((width-listaWidth)*0.05));
-		
-		TableColumn col1 = table.getColumnModel().getColumn(1);
-		col1.setPreferredWidth((int)((width-listaWidth)*0.25));
-		
-		TableColumn col2 = table.getColumnModel().getColumn(2);
-		col2.setPreferredWidth((int)((width-listaWidth)*0.25));
-		
-		TableColumn col3 = table.getColumnModel().getColumn(3);
-		col3.setPreferredWidth((int)((width-listaWidth)*0.35));
-		
-		TableColumn col4 = table.getColumnModel().getColumn(4);
-		col4.setPreferredWidth((int)((width-listaWidth)*0.05));
-		
-		TableColumn col5 = table.getColumnModel().getColumn(4);
-		col5.setPreferredWidth((int)((width-listaWidth)*0.05));
-		
-		TableColumn tcolumnas = table.getColumnModel().getColumn(0);
-		tcolumnas.setCellRenderer(table.getDefaultRenderer(Boolean.class));
-		tcolumnas.setCellEditor(table.getDefaultEditor(Boolean.class));
-		
-		felsoScroll.setSize(width-listaWidth, height-alsoHeight);
-		felsoScroll.setPreferredSize(new Dimension(width-listaWidth, height-alsoHeight));
+		felsoScroll.setSize(width, height-alsoHeight);
+		felsoScroll.setPreferredSize(new Dimension(width, height-alsoHeight));
 		felsoScroll.getVerticalScrollBar().setUnitIncrement(30);
 		
 		also.setLayout(new BorderLayout());
-		
-		TitledBorder title1;
-		Border blackline = BorderFactory.createLineBorder(Color.gray);
-		title1 = BorderFactory.createTitledBorder(blackline, "Választott laborvizsgálatok");
-		lista.setBorder(title1);
-		lista.setLayout(new BoxLayout(lista, BoxLayout.PAGE_AXIS)); 
-		lista.setPreferredSize(new Dimension(listaWidth, height-alsoHeight));
-		lista.setSize(new Dimension(listaWidth, height-alsoHeight));
-		lista.setAlignmentY(Component.TOP_ALIGNMENT);
 				
 		gombok.setPreferredSize(new Dimension(width, buttonHeight));
 		gombok.setLayout(new BoxLayout(gombok, BoxLayout.X_AXIS));
 		gombok.add(deselectAll);
 		gombok.add(category);
 		gombok.add(newItem);
-		gombok.add(manageItem);
+		//gombok.add(manageItem);
 			
 		kereses.setFont(new Font("SansSerif", Font.PLAIN, 20));
 		kereses.setPreferredSize(new Dimension(width, searchHeight));
@@ -187,93 +304,12 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 			
 		setLayout(new BorderLayout());
 		add(felsoScroll,"Center");
-		add(lista,"East");
 		add(keresoPanel,"North");
 		add(also,"South");
 			
 		refresh();
 	}
 	
-	public void initComponents(){
-		deselectAll = new JButton("Összes kijelölés megszüntetése", new ImageIcon(Const.PROJECT_PATH+"icon_cancel.png"));
-		category = new JButton("Kategóriák kezelése", new ImageIcon(Const.PROJECT_PATH+"icon_category.png"));
-		newItem = new JButton("Új laborvizsgálat", new ImageIcon(Const.PROJECT_PATH+"icon_new.png"));
-		manageItem = new JButton("Laborvizsgálatok kezelése", new ImageIcon(Const.PROJECT_PATH+"icon_edit.png"));
-		valasztott = new ArrayList<Labor>();
-		checkBoxLista = new ArrayList<JCheckBox>();
-		felso = new JPanel();
-		
-		
-		DefaultTableModel tableModel = new DefaultTableModel() {
-			
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = 4455267473892614053L;
-			String[] columnNames = 
-				   {"",
-	                "Csoport",
-	                "Nev",
-	                "Megjegyzes",
-	                "AranyAr",
-	                ""};
-
-			@Override
-		    public String getColumnName(int col) {
-		        return columnNames[col];
-		    }
-			
-			
-			@Override
-			public Object getValueAt(int row, int col) {
-				if (col==0){
-				   return new Boolean("false"); 	   
-				} else if (col==1){
-					Iterator<Csoport> it = dao.getLaborCsoport().iterator();
-					String nev = null;
-					while (it.hasNext()){
-						Csoport cs = it.next();
-						if (cs.getId()==((Labor)this.getValueAt(row, col+1)).getCsoport()){
-							nev = cs.getNev();
-							break;
-						}
-					}
-					return nev;
-				} else if (col==2){
-					return dao.getLabor().get(row);
-				} else if (col==3){
-					return ((Labor)this.getValueAt(row, col-1)).getMegj();
-				} else if (col==4){
-					return ((Labor)this.getValueAt(row, col-2)).getAranyklinikaAr();
-				} else if (col==5){
-					return "Edit";
-				}
-				return "Error";
-			}
-			
-			@Override
-			public int getRowCount() {
-				// TODO Auto-generated method stub
-				return dao.getLabor().size();
-			}
-			
-			@Override
-			public int getColumnCount() {
-				// TODO Auto-generated method stub
-				return 6;
-			}
-			
-		};		      
-		
-		table = new JTable(tableModel);
-		felsoScroll = new JScrollPane(table);
-		also = new JPanel();
-		lista = new JPanel();
-		gombok = new JPanel();
-		kereses = new JTextField();
-		keresoPanel = new JPanel();
-		kasszaVegosszeg = new JLabel();
-	}
 	
 	public int getAlapdij(){
 		int alapdij = 0;
@@ -281,12 +317,7 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 	    Iterator<Labor> itAlapdij = dao.getLabor().iterator();
 	    while ( itAlapdij.hasNext() ){
 	    	Labor j = itAlapdij.next();
-	    	String nev = j.getNev1();
-	    	if (nev.length()>35){
-	    		nev = nev.substring(0,35)+"...";
-	    	}
 	    	if (j.getAlapdij().equals("igen")){
-	    		lista.add(new JLabel("<html><b>"+nev+"</b> ("+j.getAranyklinikaAr()+" HUF)</html>"));
 	    		alapdij += j.getAranyklinikaAr();
 	    	}
 	    }
@@ -295,121 +326,28 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 	}
 	
 	public void init(){
-		setFizetendo(getAlapdij());
 		refreshGUI();
+		
 	}
 	
-	public void refreshGUI(){
-			lista.removeAll();
-			
-			getAlapdij();
-			
-			Iterator<Labor> rekordIt = dao.getLabor().iterator();
-			Iterator<Csoport> csoportIt = dao.getLaborCsoport().iterator();
-			int elozo = 0;
-			while ( rekordIt.hasNext() ){
-		    	Labor j = rekordIt.next();
-		    	if (elozo!=j.getCsoport()){
-		    		Csoport cs = csoportIt.next();
-		    		String labelText = "<html><table><tr style='background-color: #5AAD41; color: white;'><td style='width: "+(felsoScroll.getPreferredSize().width-componentWidth)+"px;'><b>"+cs.getNev()+"</b></td></tr></table></html>";
-		    		felso.add(new JLabel(labelText));				    			
-		    	}
-		    	if (j.getAllapot().equals("aktiv")){
-		    		rekordPaint(j);
-		    	}
-		    	elozo = j.getCsoport();
-			}
-		    
-		    refresh();
+	public void refreshGUI(){			
+			setFizetendo(getAlapdij());
 	}
 	
-	public void rekordPaint(Labor j){
-    	String masodik = "";
-    	if (!j.getNev2().equals("")){
-    		masodik = "("+j.getNev2()+")";
-    	}
-    	if (j.getAlapdij().equals("nem")){
-    		String megj = "", ido="";
-    		if (!j.getMegj().equals("")){
-    			if (j.getMegj().length()>50){
-    				megj = "<br/><table><tr><td style='width: "+(felsoScroll.getPreferredSize().width-componentWidth)+"px;'>Megj: "+j.getMegj()+"</td></tr></table>";
-    			} else {
-    				megj = " Megj: "+j.getMegj();
-    			}
-    		}
-    		if (!j.getIdo().equals("")){
-    			ido = " ("+j.getIdo()+")";
-    		}
-    		
-    		JCheckBox ck = new JCheckBox("<html><b>"+j.getNev1()+"</b> "+masodik+ido+megj+"</html>");
-    		ck.addItemListener(this);
-    		checkBoxLista.add(ck);
-    		felso.add(ck);
-    	}
-	}
-	
-	public void valasztottak(){
-		int i = 0;
-		 Iterator<Labor> it = valasztott.iterator(); 
-		    while ( it.hasNext() ){
-		    	Labor j = it.next();
-		    	String nev = j.getNev1();
-		    	if (nev.length()>35){
-		    		nev = nev.substring(0,35)+"...";
-		    	}
-		    	lista.add(new JLabel("<html><b>"+nev+"</b> ("+j.getAranyklinikaAr()+" HUF)</html>"));
-		    	i++;
-		    }
-		    
-		    if (i>0) deselectAll.setEnabled(true); else deselectAll.setEnabled(false); 
-	}
 	
 	public void beallitKasszaVegosszeg(int osszeg){
 		kasszaVegosszeg.setText("<html><div style='text-align: right;'><span style='font-size: 20px; font-weight: bold;'>Fizetendő:</span> <span style='font-size: 30px; font-weight: bold;'>"+osszeg+"&nbsp;HUF&nbsp;</span></div></html>");
 	}
-
-	@Override
-	public void itemStateChanged(ItemEvent arg0) {
-		Iterator<JCheckBox> it = checkBoxLista.iterator();
-		JCheckBox clickObject;
-		int i = 0;
-		while (it.hasNext()){
-				clickObject = it.next();
-				if (clickObject==arg0.getSource()){
-					if (clickObject.getSelectedObjects()==null){
-						setFizetendo(getFizetendo()-dao.getLabor().get(i).getAranyklinikaAr());
-						valasztott.remove(dao.getLabor().get(i));
-					}else{
-						setFizetendo(getFizetendo()+dao.getLabor().get(i).getAranyklinikaAr());
-						valasztott.add(dao.getLabor().get(i));
-					}
-					break;
-				}
-				i++;
-		}
-		lista.removeAll();
-		getAlapdij();
-		valasztottak();
-		refresh();
-	}
 	
 	public void refresh(){
 		repaint();
-		SwingUtilities.updateComponentTreeUI(lista);
 		SwingUtilities.updateComponentTreeUI(this);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource()==deselectAll){
-			valasztott.removeAll(valasztott);
-			Iterator<JCheckBox> it = checkBoxLista.iterator();
-			JCheckBox clickObject;
-			while (it.hasNext()){
-				clickObject = it.next();
-				clickObject.setSelected(false);
-			}
-			refresh();
+			deselectAll();
 		} else if (e.getSource()==category){
 			new LabCashCategory(dao);
 		} else if (e.getSource()==manageItem){
@@ -418,29 +356,34 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 			new LabCashItem(dao);
 		}
 	}
+	
+	public void deselectAll(){
+		Iterator<Labor> itAlapdij = dao.getLabor().iterator();
+	    while ( itAlapdij.hasNext() ){
+	    	Labor j = itAlapdij.next();
+	    	if (j.getAlapdij().equals("nem"))
+	    		j.setSelected(false);
+	    }
+	    setFizetendo(getAlapdij());
+		refresh();
+		selectedCount = 0;
+		deselectAll.setEnabled(false);
+	}
 
 	/*
 	 * Searchbar filter function
 	 * Called by the DocumentListener
 	 * */
 	public void filter(){
-		String szoveg = (kereses.getText()).toLowerCase();
-		//System.out.println(szoveg);
-		boolean bool = true;
-			Iterator<JCheckBox> lab = checkBoxLista.iterator();
-			while (lab.hasNext()){
-				JCheckBox ch = lab.next();
-				if ((ch.getText().toLowerCase().contains(szoveg)) || (ch.getText().toLowerCase().contains(szoveg))){
-					bool = true;
-				} else {
-					bool = false;
-				}
-				if (szoveg.length()>1){
-					ch.setVisible(bool);
-				} else {
-					ch.setVisible(true);
-				}
-			}
+		List<RowFilter<Object,Object>> rfs = new ArrayList<RowFilter<Object,Object>>(2);
+			rfs.add(RowFilter.regexFilter("(?i)"+kereses.getText(), 1));
+			rfs.add(RowFilter.regexFilter("(?i)"+kereses.getText(), 2));
+		
+		RowFilter<DefaultTableModel, Object> rf = RowFilter.orFilter(rfs);
+	    sorter.setRowFilter(rf);
+	    
+	    table.revalidate();
+	    table.repaint();
 	}
 
 	
@@ -471,16 +414,69 @@ public class LabCashWindow extends BaseWindow implements ItemListener, ActionLis
 		return fizetendo;
 	}
 
-	@Override
-	public void focusGained(FocusEvent arg0) {
-		// TODO Auto-generated method stub
-		System.out.println("mama");
+	
 	}
 
-	@Override
-	public void focusLost(FocusEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
+class ColorColumnRenderer extends DefaultTableCellRenderer 
+{
 
+/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5231478102825612264L;
+Color selectedColor = new Color(112, 29, 37);
+   Color selectedForeColor = new Color(239, 205, 108);
+   float selectedFontSize = 13f;
+   
+   Color unSelectedForeColor;
+   Color unSelectedColor;
+   float unSelectedFontSize = 11f;
+   
+   int fontStyle;
+   
+   private JCheckBox box = new JCheckBox();
+ 	
+   public ColorColumnRenderer() {
+      super(); 
+   }
+  	
+   public Component getTableCellRendererComponent
+	    (JTable table, Object value, boolean isSelected,
+	     boolean hasFocus, int row, int column) 
+   {
+      Component cell = super.getTableCellRendererComponent
+         (table, value, isSelected, hasFocus, row, column);
+      
+      if (row%2==0){
+    	  unSelectedColor = Color.white;
+    	  unSelectedForeColor = Color.black;
+      } else {
+    	  unSelectedColor = new Color(233, 233, 233);
+    	  unSelectedForeColor = Color.black;
+      }
+      
+      if (column==0){
+    	  box.setHorizontalAlignment(SwingConstants.CENTER);  
+    	  box.setBackground( Color.white);  
+    	  box.setSelected((Boolean)(table.getModel().getValueAt(row, 0)));
+      	  return box;
+      } else {
+    	  boolean firstCell = (Boolean)(table.getModel().getValueAt(row, 0));
+
+          if (firstCell){
+        	  cell.setBackground( selectedColor );
+              cell.setForeground( selectedForeColor );
+              cell.setFont( cell.getFont().deriveFont(selectedFontSize).deriveFont(Font.BOLD) );
+          } else {
+        	  cell.setBackground( unSelectedColor );
+        	  cell.setForeground( unSelectedForeColor );
+        	  cell.setFont( cell.getFont().deriveFont(unSelectedFontSize).deriveFont(Font.PLAIN) );
+          }        
+      }
+      table.revalidate();
+      table.repaint();
+      return cell;  
+      
+      
+   }
 }

@@ -13,6 +13,7 @@ public class Labor {
 	private String alapdij;
 	private int csoport;
 	private String allapot;
+	private Boolean selected;
 	
 	public Labor(int id, String nev1, String nev2, String megj, String ido,
 			int laborAr, int partnerAr, int aranyklinikaAr, String alapdij, int csoport, String allapot) {
@@ -27,10 +28,15 @@ public class Labor {
 		this.alapdij = alapdij;
 		this.setCsoport(csoport);
 		this.setAllapot(allapot);
+		if (alapdij.equals("igen"))
+			this.setSelected(true);
+		else 
+			this.setSelected(false);
 	}
 	
 	public Labor(){
 		this.id = 0;
+		this.setSelected(false);
 	}
 	
 	public int getId() {
@@ -107,5 +113,13 @@ public class Labor {
 
 	public void setAllapot(String allapot) {
 		this.allapot = allapot;
+	}
+
+	public Boolean getSelected() {
+		return selected;
+	}
+
+	public void setSelected(Boolean selected) {
+		this.selected = selected;
 	}
 }
