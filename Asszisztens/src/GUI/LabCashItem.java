@@ -1,7 +1,6 @@
 package GUI;
 
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.sql.SQLException;
@@ -130,13 +129,18 @@ public class LabCashItem extends BaseWindow{
     	csoport = new JComboBox();
         csoport.addItem("-- Válasszon! --");
         Iterator<Csoport> cs = dao.getLaborCsoport().iterator();
+        int i = 1;
         while (cs.hasNext()){
-        	csoport.addItem(cs.next());
+        	Csoport actCsoport = cs.next();
+        	csoport.addItem(actCsoport);
+        	 if (l.getCsoport()!=0){
+        		 if (l.getCsoport()==actCsoport.getId())
+        			 csoport.setSelectedIndex(i);		
+         	}
+        	i++;
         }	
         editPanel.add(csoport);
-        if (l.getCsoport()!=0){
-        	csoport.setSelectedIndex(l.getCsoport());		
-    	}
+       
     	
     	//Állapot
     	editPanel.add(new JLabel("Állapot (megjelenik-e):"));
@@ -152,8 +156,15 @@ public class LabCashItem extends BaseWindow{
         }
           	
         editPanel.add(allapot);
+        if (this.l==null){
+        	editPanel.add(new JLabel(""));
+        } else {
+        	JButton delete = new JButton("Törlés");
+        	delete.addActionListener(this);
+            delete.setActionCommand("delete");
+            editPanel.add(delete);
+        }
         
-        editPanel.add(new JLabel(""));
     	
     	JButton edit = new JButton("Rögzít");
     	edit.addActionListener(this);
@@ -184,17 +195,11 @@ public class LabCashItem extends BaseWindow{
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getActionCommand()=="create"){
-			int cs1 = 0;
-			Iterator<Csoport> it = dao.getLaborCsoport().iterator();
-			while (it.hasNext()){
-				Csoport cs = it.next();
-				if (cs.getNev().equals((csoport.getSelectedItem()))){
-					cs1 = cs.getId();
-					break;
-				}
-			}
+			int csop = 0;
+			if (csoport.getSelectedIndex()!=0)
+				csop = ((Csoport)csoport.getSelectedItem()).getId();
 			
-			Labor lab = new Labor(0, nev.getText(), nev2.getText(), megj.getText(), ido.getText(), (Integer)(laborAr.getValue()), (Integer)partnerAr.getValue(), (Integer)aranyAr.getValue(), (String)alapdij.getSelectedItem(), cs1, (String)allapot.getSelectedItem());
+			Labor lab = new Labor(0, nev.getText(), nev2.getText(), megj.getText(), ido.getText(), (Integer)(laborAr.getValue()), (Integer)partnerAr.getValue(), (Integer)aranyAr.getValue(), (String)alapdij.getSelectedItem(), csop, (String)allapot.getSelectedItem());
 			try {
 				LabCash.insertItem(dao, lab);
 				setVisible(false);
@@ -203,16 +208,10 @@ public class LabCashItem extends BaseWindow{
 			}
 			setVisible(false);
 		} else if (e.getActionCommand()=="edit"){
-			int cs1 = 0;
-			Iterator<Csoport> it = dao.getLaborCsoport().iterator();
-			while (it.hasNext()){
-				Csoport cs = it.next();
-				if (cs.getNev().equals((csoport.getSelectedItem()))){
-					cs1 = cs.getId();
-					break;
-				}
-			}
-			
+			int csop = 0;
+			if (csoport.getSelectedIndex()!=0)
+				csop = ((Csoport)csoport.getSelectedItem()).getId();
+				
 			l.setNev1(nev.getText());
 			l.setNev2(nev2.getText());
 			l.setMegj(megj.getText());
@@ -221,7 +220,7 @@ public class LabCashItem extends BaseWindow{
 			l.setPartnerAr((Integer)partnerAr.getValue());
 			l.setAranyklinikaAr((Integer)aranyAr.getValue());
 			l.setAlapdij((String)alapdij.getSelectedItem());
-			l.setCsoport(cs1);
+			l.setCsoport(csop);
 			l.setAllapot((String)allapot.getSelectedItem());
 			try {
 				LabCash.editItem(dao, l);
@@ -230,6 +229,17 @@ public class LabCashItem extends BaseWindow{
 				BaseWindow.makeWarning("Nem tudtam a laborvizsgálatot szerkeszteni!", e1, "error");
 			}
 
+		} else if (e.getActionCommand()=="delete"){
+			Object[] options = {"Igen","Nem"};
+        	boolean sure = BaseWindow.ask(options, "Megerősítés", "Biztosan törli a laborvizsgálatot? Fontolja meg a passziválást!", new JFrame());
+        	if (sure){
+        		try {
+    				LabCash.deleteItem(dao, l);
+    				setVisible(false);
+    			} catch (SQLException e1) {
+    				BaseWindow.makeWarning("Nem tudtam a laborvizsgálatot törölni!", e1, "error");
+    			}
+        	}
 		}
 	}
 }

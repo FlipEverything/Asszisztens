@@ -20,7 +20,6 @@ import rekord.RendeloIdopont;
 import rekord.RendeloOrvos;
 
 import database.DAO;
-import database.DoctorSchedule;
 
 public class DoctorScheduleDeleteWindow extends BaseWindow{
 	

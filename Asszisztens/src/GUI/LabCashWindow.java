@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultRowSorter;
 import javax.swing.ImageIcon;
@@ -31,15 +30,10 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
-
-import org.apache.pdfbox.ConvertColorspace;
 
 import database.DAO;
 import rekord.Csoport;
@@ -221,7 +215,7 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 			public boolean isCellEditable(int row, int col) {
 				// TODO Auto-generated method stub
 				if (col==0)
-					if (((Labor)this.getValueAt(row, col+2)).getAlapdij().equals("nem"))
+					if (((Labor)this.getValueAt(row, col+2)).getAlapdij().equals("nem") && ((Labor)this.getValueAt(row, col+2)).getAllapot().equals("aktiv"))
 						return true;
 					else
 						return false;
@@ -388,9 +382,9 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 			while (it.hasNext()){
 				Labor l = it.next();
 				if (l.getSelected()!=false){
-					s += l.getAranyklinikaAr()+" HUF : "+
-							"<b>"+l+"</b>"+
-							((!l.getIdo().equals(""))?"<u>+"+l.getIdo()+"</u>":"")+"<br/>"+
+					s += "<b><span style='color: #701d25;'>"+l.getAranyklinikaAr()+" HUF </span>: "+
+							""+l+"</b>"+
+							((!l.getIdo().equals(""))?"+"+l.getIdo()+"":"")+"<br/>"+
 							((!l.getMegj().equals(""))?"(<i>Megj: "+l.getMegj()+"</i>)<br/>":"")+
 							"<hr/>";
 				}
@@ -536,7 +530,10 @@ Color selectedColor = new Color(112, 29, 37);
               
           } else {
         	  if (column==2){
-        		  cell.setFont( cell.getFont().deriveFont(unSelectedNameSize).deriveFont(Font.BOLD) );
+        		  if (((Labor)(table.getModel().getValueAt(actualRow, 2))).getAllapot().equals("aktiv"))
+        			  cell.setFont( cell.getFont().deriveFont(unSelectedNameSize).deriveFont(Font.BOLD) );
+        		  else
+        			  cell.setFont( cell.getFont().deriveFont(unSelectedFontSize).deriveFont(Font.PLAIN) );
         	  } else {
         		  cell.setFont( cell.getFont().deriveFont(unSelectedFontSize).deriveFont(Font.PLAIN) );  
         	  }

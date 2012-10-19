@@ -1,5 +1,6 @@
 package database;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
 
@@ -15,7 +16,13 @@ public class LabCash {
 	
 	public static void insertCategory(DAO dao, Csoport cs){
 		try {
-			int id = dao.getMysql().getS().executeUpdate("INSERT INTO csoport SET nev='"+cs.getNev()+"'", Statement.RETURN_GENERATED_KEYS);
+			String sql = "INSERT INTO csoport SET nev='"+cs.getNev()+"'";
+			dao.getMysql().getS().execute(sql, Statement.RETURN_GENERATED_KEYS);
+			ResultSet r = dao.getMysql().getS().getGeneratedKeys();
+			int id = 0;
+			if (r.next()){
+				System.out.println(id = r.getInt(1));
+			}
 			dao.getLaborCsoport().add(new Csoport(id, cs.getNev()));
 		} catch (SQLException e) {
 			BaseWindow.makeWarning("Nem tudtam a csoportot beszúrni!", e, "error");
@@ -67,9 +74,12 @@ public class LabCash {
 				""+lab.getCsoport()+", " +
 				"'"+lab.getAllapot()+"');";
 		System.out.println(sql);
-		int id = dao.getMysql().getS()
-				.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
-		lab.setId(id);
+		dao.getMysql().getS().execute(sql, Statement.RETURN_GENERATED_KEYS);
+		ResultSet r = dao.getMysql().getS().getGeneratedKeys();
+		if (r.next()){
+			lab.setId(r.getInt(1));
+		}
+		System.out.println(lab.getId());
 		dao.getLabor().add(lab);
 	}
 	
@@ -87,6 +97,14 @@ public class LabCash {
 				" allapot='"+lab.getAllapot()+"' WHERE id ="+lab.getId()+";";
 		System.out.println(sql);
 		dao.getMysql().exec(sql);
+	}
+	
+	public static void deleteItem(DAO dao, Labor lab) throws SQLException{
+		String sql = "DELETE FROM labor" +
+				" WHERE id="+lab.getId()+";";
+		System.out.println(sql);
+		dao.getMysql().exec(sql);
+		dao.getLabor().remove(lab);
 	}
 
 	
