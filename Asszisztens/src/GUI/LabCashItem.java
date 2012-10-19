@@ -1,5 +1,7 @@
 package GUI;
 
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.sql.SQLException;
@@ -10,7 +12,9 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 
@@ -32,7 +36,7 @@ public class LabCashItem extends BaseWindow{
 	private Labor l;
 	private JTextField nev;
 	private JTextField nev2;
-	private JTextField megj;
+	private JTextArea megj;
 	private JSpinner laborAr;
 	private JSpinner partnerAr;
 	private JSpinner aranyAr;
@@ -75,8 +79,14 @@ public class LabCashItem extends BaseWindow{
     	
     	//Megjegyzés
     	editPanel.add(new JLabel("Megjegyzés:"));
-    	megj = new JTextField(l.getMegj());
-    	editPanel.add(megj);	
+    	megj = new JTextArea(l.getMegj());
+    	megj.setFont(megj.getFont().deriveFont(11f));
+    	megj.setLineWrap(true);
+    	megj.setWrapStyleWord(true);
+    	
+    	JScrollPane megjPane = new JScrollPane(megj);
+    	megjPane.setPreferredSize(new Dimension(megj.getWidth(),80));
+    	editPanel.add(megjPane);	
     
     	//Elkészítési idő
     	editPanel.add(new JLabel("Vizsgálati idő:"));

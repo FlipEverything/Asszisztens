@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultRowSorter;
 import javax.swing.ImageIcon;
@@ -30,10 +31,15 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
+
+import org.apache.pdfbox.ConvertColorspace;
 
 import database.DAO;
 import rekord.Csoport;
@@ -81,6 +87,7 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 	private JTable table;
 	private int selectedCount = 0;
 	private DefaultRowSorter<DefaultTableModel, Integer> sorter;
+	private JButton report;
 	
 	public static final int COLUMN_COUNT = 5;
 
@@ -106,6 +113,7 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 		category = new JButton("Kategóriák kezelése", new ImageIcon(Const.PROJECT_PATH+"icon_category.png"));
 		newItem = new JButton("Új laborvizsgálat", new ImageIcon(Const.PROJECT_PATH+"icon_new.png"));
 		manageItem = new JButton("Laborvizsgálatok kezelése", new ImageIcon(Const.PROJECT_PATH+"icon_edit.png"));
+		report = new JButton("Összesítő", new ImageIcon(Const.PROJECT_PATH+"icon_report.png"));
 		felso = new JPanel();
 	
 		DefaultTableModel tableModel = new DefaultTableModel() {
@@ -233,6 +241,7 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 		table.setRowSelectionAllowed(false);
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		table.setRowHeight(30);
+		table.getTableHeader().setEnabled(false);
 		
 		table.addMouseListener(new MouseAdapter() {
 			   public void mouseClicked(MouseEvent e) {
@@ -242,7 +251,14 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 			         int column = target.getSelectedColumn();
 				         if (column==2){
 				        	 deselectAll();
-				        	 new LabCashItem(dao, (Labor)table.getModel().getValueAt(row, column)); 
+				        	 int view = table.convertRowIndexToModel(row);
+				      	   int actualRow = 0;
+				      	  if (view != row){
+				      		  actualRow = view;
+				      	  } else {
+				      		  actualRow = row;
+				      	  }
+				        	 new LabCashItem(dao, (Labor)table.getModel().getValueAt(actualRow, column)); 
 				         }
 			         }
 			   }
@@ -275,6 +291,9 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 		manageItem.addActionListener(this);
 		manageItem.setFocusable(false);
 		
+		report.addActionListener(this);
+		report.setFocusable(false);
+		
 		felso.setLayout(new BoxLayout(felso, BoxLayout.PAGE_AXIS));
 		felso.setSize(new Dimension(width, height-alsoHeight));
 		
@@ -289,6 +308,7 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 		gombok.add(deselectAll);
 		gombok.add(category);
 		gombok.add(newItem);
+		gombok.add(report);
 		//gombok.add(manageItem);
 			
 		kereses.setFont(new Font("SansSerif", Font.PLAIN, 20));
@@ -350,11 +370,37 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 			deselectAll();
 		} else if (e.getSource()==category){
 			new LabCashCategory(dao);
-		} else if (e.getSource()==manageItem){
-			new LabCashManage(dao);
+		/*} else if (e.getSource()==manageItem){
+			new LabCashManage(dao);*/
+		} else if (e.getSource()==report){
+			report();
 		} else if (e.getSource()==newItem){
 			new LabCashItem(dao);
 		}
+	}
+	
+	public void report(){
+		String s = "<html>";
+		if (selectedCount==0){
+			s += "Nincs kiválasztva vizsgálat!";
+		} else {
+			Iterator<Labor> it = dao.getLabor().iterator();
+			while (it.hasNext()){
+				Labor l = it.next();
+				if (l.getSelected()!=false){
+					s += l.getAranyklinikaAr()+" HUF : "+
+							"<b>"+l+"</b>"+
+							((!l.getIdo().equals(""))?"<u>+"+l.getIdo()+"</u>":"")+"<br/>"+
+							((!l.getMegj().equals(""))?"(<i>Megj: "+l.getMegj()+"</i>)<br/>":"")+
+							"<hr/>";
+				}
+				
+			}
+		}
+		
+		s+="</html>";
+		
+		BaseWindow.makeWarning(s, new Exception(), "success");
 	}
 	
 	public void deselectAll(){
@@ -427,10 +473,12 @@ class ColorColumnRenderer extends DefaultTableCellRenderer
 Color selectedColor = new Color(112, 29, 37);
    Color selectedForeColor = new Color(239, 205, 108);
    float selectedFontSize = 13f;
+   float selectedNameSize = 14f;
    
    Color unSelectedForeColor;
    Color unSelectedColor;
    float unSelectedFontSize = 11f;
+   float unSelectedNameSize = 12f;
    
    int fontStyle;
    
@@ -444,8 +492,19 @@ Color selectedColor = new Color(112, 29, 37);
 	    (JTable table, Object value, boolean isSelected,
 	     boolean hasFocus, int row, int column) 
    {
+	  
+	   int view = table.convertRowIndexToModel(row);
+	   int actualRow = 0;
+	  if (view != row){
+		  actualRow = view;
+	  } else {
+		  actualRow = row;
+	  }
+	   
       Component cell = super.getTableCellRendererComponent
          (table, value, isSelected, hasFocus, row, column);
+        
+      //System.out.println(row+" "+view);
       
       if (row%2==0){
     	  unSelectedColor = Color.white;
@@ -458,19 +517,32 @@ Color selectedColor = new Color(112, 29, 37);
       if (column==0){
     	  box.setHorizontalAlignment(SwingConstants.CENTER);  
     	  box.setBackground( Color.white);  
-    	  box.setSelected((Boolean)(table.getModel().getValueAt(row, 0)));
+    	  box.setSelected((Boolean)(table.getModel().getValueAt(actualRow, 0)));
       	  return box;
       } else {
-    	  boolean firstCell = (Boolean)(table.getModel().getValueAt(row, 0));
+    	  if (column==4){
+    		  ((JLabel) cell).setHorizontalAlignment(SwingConstants.CENTER);  
+    	  }
+    	  boolean firstCell = (Boolean)(table.getModel().getValueAt(actualRow, 0));
 
           if (firstCell){
+        	  if (column==2){
+        		  cell.setFont( cell.getFont().deriveFont(selectedNameSize).deriveFont(Font.BOLD) );
+        	  } else {
+        		  cell.setFont( cell.getFont().deriveFont(selectedFontSize).deriveFont(Font.BOLD) );
+        	  }
         	  cell.setBackground( selectedColor );
               cell.setForeground( selectedForeColor );
-              cell.setFont( cell.getFont().deriveFont(selectedFontSize).deriveFont(Font.BOLD) );
+              
           } else {
+        	  if (column==2){
+        		  cell.setFont( cell.getFont().deriveFont(unSelectedNameSize).deriveFont(Font.BOLD) );
+        	  } else {
+        		  cell.setFont( cell.getFont().deriveFont(unSelectedFontSize).deriveFont(Font.PLAIN) );  
+        	  }
         	  cell.setBackground( unSelectedColor );
         	  cell.setForeground( unSelectedForeColor );
-        	  cell.setFont( cell.getFont().deriveFont(unSelectedFontSize).deriveFont(Font.PLAIN) );
+        	  
           }        
       }
       table.revalidate();
