@@ -90,18 +90,18 @@ public class MainWindow implements ActionListener{
 			BaseWindow.makeWarning("SQL parancsfuttatási hiba!", e1, "error", new JFrame());
 		}
 		
-		window.setIconImage(Toolkit.getDefaultToolkit().getImage(Const.PROJECT_PATH+"icon.png"));
+		window.setIconImage(Toolkit.getDefaultToolkit().getImage(Const.ICON_PATH+"icon.png"));
 		
 	    /** A menusor letrehozasa, beallitasa, hozzaadasa az ablakhoz */
 		newJMenu("Fájl", KeyEvent.VK_F, "Fájl menü");
 			newJMenuItem("update", "Frissítés keresése", "", true);	
 			newJMenuItem("exit", "Kilépés", KeyEvent.VK_X, "", true);	
 		newJMenu("Lelet átalakítás", KeyEvent.VK_F, "Lelet menü");
-			newJMenuItem("centrumlab", "Centrumlab lelet feldolgozás", "", true, new ImageIcon(Const.PROJECT_PATH+"icon_centrumlab.png")); 
+			newJMenuItem("centrumlab", "Centrumlab lelet feldolgozás", "", true, new ImageIcon(Const.ICON_PATH+"icon_centrumlab.png")); 
 		newJMenu("Rendelő nyilvántartás", KeyEvent.VK_F, "Lelet menü");
-			newJMenuItem("rendeloBeosztas", "Rendelő beosztás", "", true, new ImageIcon(Const.PROJECT_PATH+"icon_calendar.png"));
+			newJMenuItem("rendeloBeosztas", "Rendelő beosztás", "", true, new ImageIcon(Const.ICON_PATH+"icon_calendar.png"));
 			newJMenuItem("penztar", "Betegelőjegyzés (időpontkiadás)", "", false);
-			newJMenuItem("penztar", "Laborvizsgálat árszámító", "", true, new ImageIcon(Const.PROJECT_PATH+"icon_lab.png"));
+			newJMenuItem("penztar", "Laborvizsgálat árszámító", "", true, new ImageIcon(Const.ICON_PATH+"icon_lab.png"));
 			newJMenuItem("penztar", "WebLabor", "", false);
 		/*newJMenu("WebLabor (IN PROGRESS)", KeyEvent.VK_F, "Lelet menü");
 			newJMenuItem("ujOrvos", "Új orvos regisztrálása", "");
@@ -120,18 +120,19 @@ public class MainWindow implements ActionListener{
 		mainCenterPanel.setBorder(title);
 		
 		
-		JButton centrumLab = new JButton("CentrumLab lelet", new ImageIcon(Const.PROJECT_PATH+"icon_centrumlab.png"));
+		JButton centrumLab = new JButton("CentrumLab lelet", new ImageIcon(Const.ICON_PATH+"icon_centrumlab.png"));
 		centrumLab.addActionListener(this);
 		centrumLab.setActionCommand("centrumlab");
 		centrumLab.setFocusable(false);
 		
-		JButton calendar = new JButton("Rendelő beosztás", new ImageIcon(Const.PROJECT_PATH+"icon_calendar.png"));
+		JButton calendar = new JButton("Rendelő beosztás", new ImageIcon(Const.ICON_PATH+"icon_calendar.png"));
+		
 		calendar.addActionListener(this);
 		calendar.setActionCommand("rendeloBeosztas");
 		calendar.setFocusable(false);
 		calendar.setEnabled(true);
 		
-		JButton lab = new JButton("Laborvizsgálatok", new ImageIcon(Const.PROJECT_PATH+"icon_lab.png"));
+		JButton lab = new JButton("Laborvizsgálatok", new ImageIcon(Const.ICON_PATH+"icon_lab.png"));
 		lab.addActionListener(this);
 		lab.setActionCommand("penztar");
 		lab.setFocusable(false);

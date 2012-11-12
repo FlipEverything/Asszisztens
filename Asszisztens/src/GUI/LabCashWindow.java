@@ -99,7 +99,7 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 
 	public LabCashWindow(DAO dao){
 		super(width, height, resizable, visible, title, 0, 0, defaultCloseOperation, exit);
-		setIconImage(Toolkit.getDefaultToolkit().getImage(Const.PROJECT_PATH+"icon_lab.png"));
+		setIconImage(Toolkit.getDefaultToolkit().getImage(Const.ICON_PATH+"icon_lab.png"));
 
 		this.dao = dao;
 		this.fizetendo = 0;	
@@ -114,12 +114,12 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 		kereses = new JTextField();
 		keresoPanel = new JPanel();
 		kasszaVegosszeg = new JLabel();
-		deselectAll = new JButton("Összes kijelölés megszüntetése", new ImageIcon(Const.PROJECT_PATH+"icon_cancel.png"));
-		category = new JButton("Kategóriák kezelése", new ImageIcon(Const.PROJECT_PATH+"icon_category.png"));
-		newItem = new JButton("Új laborvizsgálat", new ImageIcon(Const.PROJECT_PATH+"icon_new.png"));
-		manageItem = new JButton("Laborvizsgálatok kezelése", new ImageIcon(Const.PROJECT_PATH+"icon_edit.png"));
-		report = new JButton("Összesítő", new ImageIcon(Const.PROJECT_PATH+"icon_report.png"));
-		sumFilter = new JButton("Csak a kiválasztottak mutatása", new ImageIcon(Const.PROJECT_PATH+"icon_report.png"));
+		deselectAll = new JButton("Összes kijelölés megszüntetése", new ImageIcon(Const.ICON_PATH+"icon_cancel.png"));
+		category = new JButton("Kategóriák kezelése", new ImageIcon(Const.ICON_PATH+"icon_category.png"));
+		newItem = new JButton("Új laborvizsgálat", new ImageIcon(Const.ICON_PATH+"icon_new.png"));
+		manageItem = new JButton("Laborvizsgálatok kezelése", new ImageIcon(Const.ICON_PATH+"icon_edit.png"));
+		report = new JButton("Összesítő", new ImageIcon(Const.ICON_PATH+"icon_report.png"));
+		sumFilter = new JButton("Csak a kiválasztottak mutatása", new ImageIcon(Const.ICON_PATH+"icon_report.png"));
 		felso = new JPanel();
 	
 		DefaultTableModel tableModel = new DefaultTableModel() {

@@ -34,7 +34,7 @@ public class LabCashCategory extends BaseWindow{
 
 	public LabCashCategory(DAO dao){
 		super(400, 400, false, false, "Laborcsopotok", 0, 0, JFrame.DISPOSE_ON_CLOSE, false);
-		setIconImage(Toolkit.getDefaultToolkit().getImage(Const.PROJECT_PATH+"icon_category.png"));
+		setIconImage(Toolkit.getDefaultToolkit().getImage(Const.ICON_PATH+"icon_category.png"));
 		
 		this.dao = dao;
 		

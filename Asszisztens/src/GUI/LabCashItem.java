@@ -46,7 +46,7 @@ public class LabCashItem extends BaseWindow{
 
 	public LabCashItem(DAO dao){
 		super(400, 380, false, true, "Új laborvizsgálat felvitele", 0, 0, JFrame.HIDE_ON_CLOSE, false);
-		setIconImage(Toolkit.getDefaultToolkit().getImage(Const.PROJECT_PATH+"icon_new.png"));
+		setIconImage(Toolkit.getDefaultToolkit().getImage(Const.ICON_PATH+"icon_new.png"));
 		this.dao = dao;
 		
 		l = null;

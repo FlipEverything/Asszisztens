@@ -32,7 +32,7 @@ public class LabCashManage extends BaseWindow{
 
 	public LabCashManage(final DAO dao){
 		super(width, height, false, true, "Laborvizsgálatok listája", 0, 0, JFrame.DISPOSE_ON_CLOSE, false);
-		setIconImage(Toolkit.getDefaultToolkit().getImage(Const.PROJECT_PATH+"icon_edit.png"));
+		setIconImage(Toolkit.getDefaultToolkit().getImage(Const.ICON_PATH+"icon_edit.png"));
 		
 		this.dao = dao;
 		

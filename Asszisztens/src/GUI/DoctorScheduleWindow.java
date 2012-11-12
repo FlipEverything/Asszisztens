@@ -54,7 +54,7 @@ public class DoctorScheduleWindow extends BaseWindow{
 	
 	public DoctorScheduleWindow(DAO dao){
 		super(0, 0, true, false, "Rendelő beosztás - Orvosok", 0, 0, JFrame.DISPOSE_ON_CLOSE, false);
-		setIconImage(Toolkit.getDefaultToolkit().getImage(Const.PROJECT_PATH+"icon_calendar.png"));
+		setIconImage(Toolkit.getDefaultToolkit().getImage(Const.ICON_PATH+"icon_calendar.png"));
 		
 		this.dao = dao;
 		

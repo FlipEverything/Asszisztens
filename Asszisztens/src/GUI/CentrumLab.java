@@ -86,7 +86,7 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 	public CentrumLab(){
 		super(670, 650, false, false, "CentrumLab lelet átalakítás", 0, 0, JFrame.DISPOSE_ON_CLOSE, false);
 		
-		setIconImage(Toolkit.getDefaultToolkit().getImage(Const.PROJECT_PATH+"icon_centrumlab.png"));
+		setIconImage(Toolkit.getDefaultToolkit().getImage(Const.ICON_PATH+"icon_centrumlab.png"));
 		
 		mitCsere = new ArrayList<String>();
 		mireCsere = new ArrayList<String>();
@@ -136,11 +136,12 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 		//Lay out the panel.
         makeTheGrid(1, 4, panel);
         panel.setOpaque(true);
+       
         
         JPanel previewPanel = new JPanel();
         previewPanel.add(previewText);
 		JScrollPane pane = new JScrollPane(previewPanel);
-        pane.setPreferredSize(new Dimension(getSize().width, getSize().height-60));
+        pane.setPreferredSize(new Dimension(getSize().width, getSize().height-80));
         
         setLayout(new BorderLayout());
         add(panel,"Center");
@@ -157,22 +158,22 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 
 	
 	public void init(){
-		openFile = new JButton("Megnyitás", new ImageIcon(Const.PROJECT_PATH+"icon_open.png"));
+		openFile = new JButton("Megnyitás", new ImageIcon(Const.ICON_PATH+"icon_open.png"));
 		openFile.addActionListener(this);
 		openFile.setActionCommand("openFile");
 		
-		editFile = new JButton("Szerkesztés", new ImageIcon(Const.PROJECT_PATH+"icon_edit.png"));
+		editFile = new JButton("Szerkesztés", new ImageIcon(Const.ICON_PATH+"icon_edit.png"));
 		editFile.addActionListener(this);
 		editFile.setActionCommand("editFile");
 		editFile.setEnabled(false);
 		
-		saveFile = new JButton("Mentés", new ImageIcon(Const.PROJECT_PATH+"icon_save.png"));
+		saveFile = new JButton("Mentés", new ImageIcon(Const.ICON_PATH+"icon_save.png"));
 		saveFile.addActionListener(this);
 		saveFile.setActionCommand("saveFile");
 		saveFile.setEnabled(false);
 		
 		
-		cancel = new JButton("Mégsem", new ImageIcon(Const.PROJECT_PATH+"icon_cancel.png"));
+		cancel = new JButton("Mégsem", new ImageIcon(Const.ICON_PATH+"icon_cancel.png"));
 		cancel.addActionListener(this);
 		cancel.setActionCommand("cancel");
 		cancel.setEnabled(false);
@@ -317,9 +318,9 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 	}
 	
 	public void finalize(){
-		String path = Const.PROJECT_PATH +"logo.pdf";
+		String path = Const.RESOURCES_PATH +"logo.pdf";
 			addWatermark(path);
-			//System.out.println(path);
+			
 		save(url);
 		close(doc);
 		close(watermarkDoc);
@@ -529,7 +530,7 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 		
 		editFrame.add(scrollPanel,"Center");
 		
-		JButton okay = new JButton("Rendben", new ImageIcon(Const.PROJECT_PATH+"icon_save.png"));
+		JButton okay = new JButton("Rendben", new ImageIcon(Const.ICON_PATH+"icon_save.png"));
 		okay.addActionListener(this);
 		okay.setActionCommand("okayEdit");
 		

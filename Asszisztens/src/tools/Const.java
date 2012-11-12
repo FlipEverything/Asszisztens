@@ -1,5 +1,7 @@
 package tools;
 
+import java.io.File;
+
 public class Const {
 	/**
 	 * DoctorSchedule
@@ -11,7 +13,10 @@ public class Const {
 	public static final int CALENDAR_START_HOUR = 7;
 	public static final int CALENDAR_END_HOUR = 21;
 	
-	public static final String PROJECT_PATH = Const.class.getProtectionDomain().getCodeSource().getLocation().getPath().replace("/bin", "");;
+	public static final String PROJECT_PATH = new File("").getAbsolutePath();//Const.class.getProtectionDomain().getCodeSource().getLocation().getPath().replace("/bin/", "");
+	public static final String ICON_PATH = PROJECT_PATH+"\\icon\\";
+	public static final String RESOURCES_PATH = PROJECT_PATH+"\\resources\\";
+	
 	
 	public static String getDayOfTheWeek(int i) {
 		String day = null;
