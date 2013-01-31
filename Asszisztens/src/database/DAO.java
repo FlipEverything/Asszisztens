@@ -43,11 +43,11 @@ public class DAO {
 		
 		this.setMysql(mysql);
 		
-		downloadIdopont();
+		//downloadIdopont();
 		downloadLabor();
 		downloadLaborCsoport();
-		downloadOrvos();
-		downloadSzoba();
+		//downloadOrvos();
+		//downloadSzoba();
 		
 		
 		setInitialized(true);

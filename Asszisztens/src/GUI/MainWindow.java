@@ -99,10 +99,10 @@ public class MainWindow implements ActionListener{
 		newJMenu("Lelet átalakítás", KeyEvent.VK_F, "Lelet menü");
 			newJMenuItem("centrumlab", "Centrumlab lelet feldolgozás", "", true, new ImageIcon(Const.ICON_PATH+"icon_centrumlab.png")); 
 		newJMenu("Rendelő nyilvántartás", KeyEvent.VK_F, "Lelet menü");
-			newJMenuItem("rendeloBeosztas", "Rendelő beosztás", "", true, new ImageIcon(Const.ICON_PATH+"icon_calendar.png"));
-			newJMenuItem("penztar", "Betegelőjegyzés (időpontkiadás)", "", false);
+			//newJMenuItem("rendeloBeosztas", "Rendelő beosztás", "", true, new ImageIcon(Const.ICON_PATH+"icon_calendar.png"));
+			//newJMenuItem("penztar", "Betegelőjegyzés (időpontkiadás)", "", false);
 			newJMenuItem("penztar", "Laborvizsgálat árszámító", "", true, new ImageIcon(Const.ICON_PATH+"icon_lab.png"));
-			newJMenuItem("penztar", "WebLabor", "", false);
+			//newJMenuItem("penztar", "WebLabor", "", false);
 		/*newJMenu("WebLabor (IN PROGRESS)", KeyEvent.VK_F, "Lelet menü");
 			newJMenuItem("ujOrvos", "Új orvos regisztrálása", "");
 			newJMenuItem("szerkesztOrvos", "Orvos szerkesztése (Még nincs...)", "");
@@ -139,7 +139,7 @@ public class MainWindow implements ActionListener{
 		lab.setEnabled(true);
 		
 		mainCenterPanel.add(centrumLab);
-		mainCenterPanel.add(calendar);
+		//mainCenterPanel.add(calendar);
 		mainCenterPanel.add(lab);
 				
 		window.setTitle(titleString());
@@ -390,7 +390,8 @@ public class MainWindow implements ActionListener{
 				"Készült az Aranyklinika számára. www.aranyklinika.hu\n\r" +
 				"\n\r" +
 				"A program hálózati adatbáziskapcsolattal kéri le a számára szükséges adatokat. Többfelhasználós, adminisztrálási lehetőség.\n\r" +
-				"Automatikusan frissíti a feltelepített példányokat hálózati kapcsolaton keresztül. Fejlett hibakezelés.", new Exception(), "success", new JFrame());
+				"Automatikusan frissíti a feltelepített példányokat hálózati kapcsolaton keresztül. Fejlett hibakezelés.\n\r\n\r" +
+				"© Minden jog fenntartva. Jognyilatkozat: Ezen szoftver kizárólagos tulajdonosa a fejlesztő, mely alól kivételt képeznek a nyílt függvénykönyvtárak.\n\r A szoftvert továbbfejleszteni, eladni, bérbeadni, másolni, forrásába belenyúlni szigorúan tilos, csak a jogtulajdonos engedélyével történhet meg\n\r Az Aranyklinika Kft. számára korlátlan haszonélvezeti jog biztosított.", new Exception(), "success", new JFrame());
 	}
 	
 	public void print(String s){

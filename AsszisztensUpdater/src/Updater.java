@@ -66,7 +66,7 @@ public class Updater implements ActionListener, PropertyChangeListener{
 	private String line;
 	private String user="aranyklinika";
 	private String password="L@$mPq{db*x6";
-	private String link = "http://lddsystems.eu/projekt/asszisztens/data/";
+	private String link = "https://lddsystems.eu/projekt/asszisztens/data/";
 	private String versionLink = link+"version.txt";
 	private String updateLink = link+"update.zip";
 	private String fileDest = System.getProperty("user.dir")+fileSepa+"update.zip";
