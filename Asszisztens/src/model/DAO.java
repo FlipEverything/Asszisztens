@@ -1,4 +1,4 @@
-package database;
+package model;
 
 import java.awt.Color;
 import java.sql.SQLException;
@@ -12,13 +12,13 @@ import javax.swing.JFrame;
 import com.ibm.icu.text.DateFormat;
 import com.ibm.icu.text.SimpleDateFormat;
 
-import GUI.BaseWindow;
 
 import rekord.Csoport;
 import rekord.Labor;
 import rekord.RendeloIdopont;
 import rekord.RendeloOrvos;
 import rekord.RendeloSzoba;
+import view.BaseWindow;
 
 public class DAO {
 	private ArrayList<Labor> labor;

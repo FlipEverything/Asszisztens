@@ -1,4 +1,4 @@
-package GUI;
+package view;
 
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -12,10 +12,11 @@ import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
 
+import model.DAO;
+
 import rekord.Labor;
 import tools.Const;
 
-import database.DAO;
 
 public class LabCashManage extends BaseWindow{
 

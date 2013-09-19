@@ -1,4 +1,4 @@
-package GUI;
+package view;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -43,9 +43,9 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.apache.pdfbox.util.PDFOperator;
 
-import GUI.BaseWindow;
 import tools.Const;
 import tools.PdfOpenFilter;
+import view.BaseWindow;
 
 /**
  * @author Dobó László
@@ -90,6 +90,8 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 		
 		mitCsere = new ArrayList<String>();
 		mireCsere = new ArrayList<String>();
+		
+		//////
 		
 		mitCsere.add(new String("Centrum-Lab Kft Kiskõrösi Laboratóriuma"));
 		mireCsere.add(new String("            Aranyklinika Kft"));
@@ -193,8 +195,10 @@ public class CentrumLab extends BaseWindow implements ActionListener{
             PDPage page = (PDPage)pages.get( i );
             PDStream contents = page.getContents();
             PDFStreamParser parser = new PDFStreamParser(contents.getStream() );
+            
             parser.parse();
             List tokens = parser.getTokens();
+            
             for( int j=0; j<tokens.size(); j++ )
             {
                 Object next = tokens.get( j );
@@ -544,7 +548,7 @@ public class CentrumLab extends BaseWindow implements ActionListener{
 		int i = 0;
 		while (ite.hasNext()){
     		String string = ite.next();
-    		//System.out.println(string);
+    		System.out.println(string);
     		
     		textTomb[i] = new JTextField(string);
     		editorPanel.add(textTomb[i]);

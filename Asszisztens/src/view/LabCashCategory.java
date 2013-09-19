@@ -1,4 +1,4 @@
-package GUI;
+package view;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -16,11 +16,12 @@ import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 
+import model.DAO;
+import model.LabCash;
+
 import rekord.Csoport;
 import tools.Const;
 
-import database.DAO;
-import database.LabCash;
 
 public class LabCashCategory extends BaseWindow{
 

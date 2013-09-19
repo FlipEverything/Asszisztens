@@ -1,4 +1,4 @@
-package GUI;
+package view;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -37,13 +37,13 @@ import rekord.RendeloSzoba;
 import tools.Const;
 
 import layout.SpringUtilities;
+import model.DAO;
+import model.DoctorSchedule;
 
 import com.ibm.icu.text.DateFormat;
 import com.ibm.icu.text.SimpleDateFormat;
 import com.ibm.icu.util.Calendar;
 
-import database.DAO;
-import database.DoctorSchedule;
 
 public class DoctorScheduleNewWindow extends BaseWindow implements ActionListener{
 	

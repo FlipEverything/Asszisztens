@@ -1,4 +1,4 @@
-package database;
+package model;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -9,8 +9,8 @@ import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import tools.Base64Coder;
-import GUI.BaseWindow;
-import GUI.MainWindow;
+import view.BaseWindow;
+import view.MainWindow;
 
 /**
  * 

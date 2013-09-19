@@ -6,7 +6,8 @@ import java.sql.SQLException;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 
-import GUI.*;
+import view.*;
+
 
 /**
  * @author Dobó László

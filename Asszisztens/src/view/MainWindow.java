@@ -1,4 +1,4 @@
-package GUI;
+package view;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -32,11 +32,12 @@ import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 
-import tools.Const;
+import model.DAO;
+import model.DBConnect;
 
-import GUI.CentrumLab;
-import database.DAO;
-import database.DBConnect;
+import tools.Const;
+import view.CentrumLab;
+
 import executable.AsszisztensMain;
 
 public class MainWindow implements ActionListener{

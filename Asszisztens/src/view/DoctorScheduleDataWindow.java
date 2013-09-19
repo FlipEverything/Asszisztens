@@ -1,4 +1,4 @@
-package GUI;
+package view;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -23,8 +23,9 @@ import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
-import database.DAO;
-import database.DoctorSchedule;
+import model.DAO;
+import model.DoctorSchedule;
+
 
 public class DoctorScheduleDataWindow extends BaseWindow implements ActionListener{
 	/**

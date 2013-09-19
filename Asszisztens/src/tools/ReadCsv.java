@@ -10,7 +10,8 @@ import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.StringTokenizer;
 
-import database.DBConnect;
+import model.DBConnect;
+
 
 
 public class ReadCsv {

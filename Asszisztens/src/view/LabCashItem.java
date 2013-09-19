@@ -1,4 +1,4 @@
-package GUI;
+package view;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -22,9 +22,9 @@ import rekord.Labor;
 import tools.Const;
 
 import layout.SpringUtilities;
+import model.DAO;
+import model.LabCash;
 
-import database.DAO;
-import database.LabCash;
 
 public class LabCashItem extends BaseWindow{
 	/**

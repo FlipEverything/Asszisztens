@@ -1,4 +1,4 @@
-package GUI;
+package view;
 
 
 import java.awt.BorderLayout;
@@ -16,10 +16,11 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import model.DAO;
+
 import rekord.RendeloIdopont;
 import rekord.RendeloOrvos;
 
-import database.DAO;
 
 public class DoctorScheduleDeleteWindow extends BaseWindow{
 	

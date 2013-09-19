@@ -1,4 +1,4 @@
-package GUI;
+package view;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -13,12 +13,14 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultRowSorter;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -35,7 +37,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
 
-import database.DAO;
+import model.DAO;
+
 import rekord.Csoport;
 import rekord.Labor;
 import tools.Const;
@@ -60,6 +63,10 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 										         "Kategória",
 										         "Megjegyzés",
 										         "Ár"};
+	
+	public static final int ARANYKLINIKA_AR = 0;
+	public static final int CENTRUMLAB_AR = 1;
+	public static final int KLINIKA_AR = 2;
 	
 	//GUI Components
 	private JScrollPane felsoScroll;
@@ -97,6 +104,8 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 	private JButton report;
 	private JButton sumFilter;
 
+	private JComboBox priceFilter;
+
 	public LabCashWindow(DAO dao){
 		super(width, height, resizable, visible, title, 0, 0, defaultCloseOperation, exit);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(Const.ICON_PATH+"icon_lab.png"));
@@ -120,6 +129,9 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 		manageItem = new JButton("Laborvizsgálatok kezelése", new ImageIcon(Const.ICON_PATH+"icon_edit.png"));
 		report = new JButton("Összesítő", new ImageIcon(Const.ICON_PATH+"icon_report.png"));
 		sumFilter = new JButton("Csak a kiválasztottak mutatása", new ImageIcon(Const.ICON_PATH+"icon_report.png"));
+		
+		Object[] items = {"Aranyklinika ár", "CentrumLab ár", "Klinika ár"};
+		priceFilter = new JComboBox(items);
 		felso = new JPanel();
 	
 		DefaultTableModel tableModel = new DefaultTableModel() {
@@ -166,7 +178,14 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 					}
 					return "<html>"+megj+"</html>";
 				} else if (col==PRICE){
-					return ((Labor)this.getValueAt(row, LAB_OBJECT)).getAranyklinikaAr();
+					if (priceFilter.getSelectedIndex()==ARANYKLINIKA_AR){
+						return ((Labor)this.getValueAt(row, LAB_OBJECT)).getAranyklinikaAr();	
+					} else if (priceFilter.getSelectedIndex()==CENTRUMLAB_AR){
+						return ((Labor)this.getValueAt(row, LAB_OBJECT)).getPartnerAr();	
+					} else if (priceFilter.getSelectedIndex()==KLINIKA_AR){
+						return ((Labor)this.getValueAt(row, LAB_OBJECT)).getLaborAr();
+					}
+					
 				}
 				return "Error";
 			}
@@ -178,11 +197,19 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 					((Labor)this.getValueAt(row, LAB_OBJECT)).setSelected(!((Labor)this.getValueAt(row, LAB_OBJECT)).getSelected());
 					Labor l = ((Labor)this.getValueAt(row, LAB_OBJECT));
 					if (l.getAlapdij().equals("nem")){
+						int ar = 0;
+						if (priceFilter.getSelectedIndex()==ARANYKLINIKA_AR){
+							ar = l.getAranyklinikaAr();
+						} else if (priceFilter.getSelectedIndex()==CENTRUMLAB_AR){
+							ar = l.getPartnerAr();
+						} else if (priceFilter.getSelectedIndex()==KLINIKA_AR){
+							ar = l.getLaborAr();
+						}
 						if (l.getSelected()==false){
-							setFizetendo(getFizetendo()-l.getAranyklinikaAr());
+							setFizetendo(getFizetendo()-ar);
 							selectedCount--;
 						}else{
-							setFizetendo(getFizetendo()+l.getAranyklinikaAr());
+							setFizetendo(getFizetendo()+ar);
 							selectedCount++;
 						}
 					}
@@ -300,6 +327,13 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 		sumFilter.addActionListener(this);
 		sumFilter.setFocusable(false);
 		
+		priceFilter.addActionListener(this);
+		priceFilter.setFocusable(false);
+		JPanel priceFilterPanel = new JPanel();
+		
+		priceFilterPanel.setPreferredSize(new Dimension(width/10, buttonHeight));
+		priceFilterPanel.add(priceFilter);
+		
 		felso.setLayout(new BoxLayout(felso, BoxLayout.PAGE_AXIS));
 		felso.setSize(new Dimension(width, height-alsoHeight));
 		
@@ -316,6 +350,7 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 		gombok.add(newItem);
 		gombok.add(report);
 		gombok.add(sumFilter);
+		gombok.add(priceFilterPanel);
 		//gombok.add(manageItem);
 			
 		kereses.setFont(new Font("SansSerif", Font.PLAIN, 20));
@@ -345,7 +380,15 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 	    while ( itAlapdij.hasNext() ){
 	    	Labor j = itAlapdij.next();
 	    	if (j.getAlapdij().equals("igen")){
-	    		alapdij += j.getAranyklinikaAr();
+	    		int ar = 0;
+	    		if (priceFilter.getSelectedIndex()==ARANYKLINIKA_AR){
+					ar = j.getAranyklinikaAr();
+				} else if (priceFilter.getSelectedIndex()==CENTRUMLAB_AR){
+					ar = j.getPartnerAr();
+				} else if (priceFilter.getSelectedIndex()==KLINIKA_AR){
+					ar = j.getLaborAr();
+				}
+	    		alapdij += ar;
 	    	}
 	    }
 		
@@ -386,6 +429,16 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 				kereses.setText("sum");
 				table.repaint();
 			}
+		} else if (e.getSource()==priceFilter){
+			for (int i=0; i<table.getModel().getRowCount(); i++){
+				if (((Labor)table.getModel().getValueAt(i, LAB_OBJECT)).getAlapdij().equals("nem")){
+					((Labor)table.getModel().getValueAt(i, LAB_OBJECT)).setSelected(false);
+				}
+			}
+			
+			
+			setFizetendo(getAlapdij());	
+			refresh();
 		}
 	}
 	
@@ -397,8 +450,16 @@ public class LabCashWindow extends BaseWindow implements  ActionListener, Docume
 			Iterator<Labor> it = dao.getLabor().iterator();
 			while (it.hasNext()){
 				Labor l = it.next();
+				int ar = 0;
+	    		if (priceFilter.getSelectedIndex()==ARANYKLINIKA_AR){
+					ar = l.getAranyklinikaAr();
+				} else if (priceFilter.getSelectedIndex()==CENTRUMLAB_AR){
+					ar = l.getPartnerAr();
+				} else if (priceFilter.getSelectedIndex()==KLINIKA_AR){
+					ar = l.getLaborAr();
+				}
 				if (l.getSelected()!=false){
-					s += "<b><span style='color: #701d25;'>"+l.getAranyklinikaAr()+" HUF </span>: "+
+					s += "<b><span style='color: #701d25;'>"+ar+" HUF </span>: "+
 							""+l+"</b>"+
 							((!l.getIdo().equals(""))?"+"+l.getIdo()+"":"")+"<br/>"+
 							((!l.getMegj().equals(""))?"(<i>Megj: "+l.getMegj()+"</i>)<br/>":"")+

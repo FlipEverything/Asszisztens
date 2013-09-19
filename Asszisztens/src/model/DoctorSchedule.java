@@ -1,11 +1,10 @@
-package database;
+package model;
 
 import java.util.Date;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import GUI.BaseWindow;
 
 import com.ibm.icu.text.DateFormat;
 import com.ibm.icu.text.SimpleDateFormat;
@@ -14,6 +13,7 @@ import com.ibm.icu.util.Calendar;
 import rekord.RendeloIdopont;
 import rekord.RendeloOrvos;
 import rekord.RendeloSzoba;
+import view.BaseWindow;
 
 public class DoctorSchedule {
 

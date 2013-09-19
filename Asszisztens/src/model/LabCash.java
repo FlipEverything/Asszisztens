@@ -1,15 +1,15 @@
-package database;
+package model;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
 
-import GUI.BaseWindow;
 
 import com.mysql.jdbc.Statement;
 
 import rekord.Csoport;
 import rekord.Labor;
+import view.BaseWindow;
 
 
 public class LabCash {

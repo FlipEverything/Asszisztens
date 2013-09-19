@@ -1,4 +1,4 @@
-package GUI;
+package view;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -21,6 +21,8 @@ import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 
+import model.DAO;
+
 import com.ibm.icu.text.DateFormat;
 import com.ibm.icu.text.SimpleDateFormat;
 import com.ibm.icu.util.Calendar;
@@ -30,7 +32,6 @@ import rekord.RendeloOrvos;
 import rekord.RendeloSzoba;
 import tools.Const;
 
-import database.DAO;
 
 public class DoctorScheduleWindow extends BaseWindow{
 	/**
